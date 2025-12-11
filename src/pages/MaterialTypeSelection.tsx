@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { useNavigation } from '@/contexts/NavigationContext';
+import { db, MaterialType } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 import { 
   FileText, 
   HelpCircle, 
@@ -10,27 +13,70 @@ import {
   List, 
   FlaskConical, 
   BookOpen, 
-  Presentation 
+  Presentation,
+  Loader2
 } from 'lucide-react';
 
-const materialTypes = [
-  { id: 'notes', title: 'Notes', icon: FileText, hasSubcategory: false },
-  { id: 'qbank', title: 'Question Bank', icon: HelpCircle, hasSubcategory: false },
-  { id: 'pyqs', title: 'PYQs', icon: Clock, hasSubcategory: true },
-  { id: 'imp', title: 'Imp Questions', icon: Star, hasSubcategory: false },
-  { id: 'syllabus', title: 'Syllabus', icon: List, hasSubcategory: false },
-  { id: 'lab', title: 'Lab Manual', icon: FlaskConical, hasSubcategory: false },
-  { id: 'textbook', title: 'Textbook', icon: BookOpen, hasSubcategory: false },
-  { id: 'ppts', title: 'PPTs', icon: Presentation, hasSubcategory: false },
-];
+const iconMap: Record<string, any> = {
+  'FileText': FileText,
+  'HelpCircle': HelpCircle,
+  'Clock': Clock,
+  'Star': Star,
+  'List': List,
+  'FlaskConical': FlaskConical,
+  'BookOpen': BookOpen,
+  'Presentation': Presentation,
+};
 
 export default function MaterialTypeSelection() {
   const navigate = useNavigate();
   const { state, setMaterialType } = useNavigation();
+  const { toast } = useToast();
+  const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSelect = (type: string, hasSubcategory: boolean) => {
-    setMaterialType(type);
-    if (hasSubcategory) {
+  useEffect(() => {
+    const fetchMaterialTypes = async () => {
+      if (!state.subjectId) {
+        toast({
+          title: 'No subject selected',
+          description: 'Please select a subject first.',
+          variant: 'destructive',
+        });
+        navigate('/subjects');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        // Get only material types that have content for this subject
+        const data = await db.getAvailableMaterialTypes(state.subjectId);
+        setMaterialTypes(data);
+        
+        if (data.length === 0) {
+          toast({
+            title: 'No materials found',
+            description: 'No study materials available for this subject yet.',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching material types:', error);
+        toast({
+          title: 'Error loading materials',
+          description: 'Please try again later.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMaterialTypes();
+  }, [state.subjectId]);
+
+  const handleSelect = (type: MaterialType) => {
+    setMaterialType(type.name, type.id);
+    if (type.has_subcategory) {
       navigate('/subcategory');
     } else {
       navigate('/pdfs');
@@ -40,16 +86,31 @@ export default function MaterialTypeSelection() {
   return (
     <PageLayout title={`${state.subject || 'Subject'} Materials`}>
       <div className="space-y-6">
-        <div className="grid grid-cols-2 gap-4">
-          {materialTypes.map((type) => (
-            <SelectionCard
-              key={type.id}
-              title={type.title}
-              icon={type.icon}
-              onClick={() => handleSelect(type.title, type.hasSubcategory)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[40vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading materials...</p>
+          </div>
+        ) : materialTypes.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+            <FileText className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No materials available yet</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-4">
+            {materialTypes.map((type) => {
+              const IconComponent = iconMap[type.icon] || FileText;
+              return (
+                <SelectionCard
+                  key={type.id}
+                  title={type.name}
+                  icon={IconComponent}
+                  onClick={() => handleSelect(type)}
+                />
+              );
+            })}
+          </div>
+        )}
       </div>
     </PageLayout>
   );

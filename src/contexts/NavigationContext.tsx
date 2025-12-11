@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { getStoredSelections, saveSelection, clearSelections } from '@/lib/storage';
 
 interface NavigationState {
   regulation: string | null;
@@ -6,7 +7,9 @@ interface NavigationState {
   year: string | null;
   semester: string | null;
   subject: string | null;
+  subjectId: string | null;
   materialType: string | null;
+  materialTypeId: string | null;
 }
 
 interface NavigationContextType {
@@ -15,8 +18,8 @@ interface NavigationContextType {
   setBranch: (value: string) => void;
   setYear: (value: string) => void;
   setSemester: (value: string) => void;
-  setSubject: (value: string) => void;
-  setMaterialType: (value: string) => void;
+  setSubject: (value: string, id: string) => void;
+  setMaterialType: (value: string, id: string) => void;
   reset: () => void;
   getBreadcrumb: () => string;
 }
@@ -27,21 +30,55 @@ const initialState: NavigationState = {
   year: null,
   semester: null,
   subject: null,
+  subjectId: null,
   materialType: null,
+  materialTypeId: null,
 };
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<NavigationState>(initialState);
+  const [state, setState] = useState<NavigationState>(() => {
+    // Load from localStorage on init
+    return { ...initialState, ...getStoredSelections() };
+  });
 
-  const setRegulation = (value: string) => setState(prev => ({ ...prev, regulation: value }));
-  const setBranch = (value: string) => setState(prev => ({ ...prev, branch: value }));
-  const setYear = (value: string) => setState(prev => ({ ...prev, year: value }));
-  const setSemester = (value: string) => setState(prev => ({ ...prev, semester: value }));
-  const setSubject = (value: string) => setState(prev => ({ ...prev, subject: value }));
-  const setMaterialType = (value: string) => setState(prev => ({ ...prev, materialType: value }));
-  const reset = () => setState(initialState);
+  const setRegulation = (value: string) => {
+    setState(prev => ({ ...prev, regulation: value }));
+    saveSelection('regulation', value);
+  };
+
+  const setBranch = (value: string) => {
+    setState(prev => ({ ...prev, branch: value }));
+    saveSelection('branch', value);
+  };
+
+  const setYear = (value: string) => {
+    setState(prev => ({ ...prev, year: value }));
+    saveSelection('year', value);
+  };
+
+  const setSemester = (value: string) => {
+    setState(prev => ({ ...prev, semester: value }));
+    saveSelection('semester', value);
+  };
+
+  const setSubject = (value: string, id: string) => {
+    setState(prev => ({ ...prev, subject: value, subjectId: id }));
+    saveSelection('subject', value);
+    saveSelection('subjectId', id);
+  };
+
+  const setMaterialType = (value: string, id: string) => {
+    setState(prev => ({ ...prev, materialType: value, materialTypeId: id }));
+    saveSelection('materialType', value);
+    saveSelection('materialTypeId', id);
+  };
+
+  const reset = () => {
+    setState(initialState);
+    clearSelections();
+  };
 
   const getBreadcrumb = () => {
     const parts = [state.regulation, state.branch, state.year, state.semester].filter(Boolean);

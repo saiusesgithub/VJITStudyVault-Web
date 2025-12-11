@@ -1,32 +1,67 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { useNavigation } from '@/contexts/NavigationContext';
+import { db, Subject } from '@/lib/supabase';
+import { useToast } from '@/hooks/use-toast';
 import { 
-  Code, 
-  Database, 
-  Network, 
-  Calculator, 
-  FileCode, 
-  Layers 
+  BookOpen,
+  Loader2
 } from 'lucide-react';
-
-// TODO: Fetch subjects from Supabase based on regulation, branch, year, semester
-const placeholderSubjects = [
-  { id: 'sub1', title: 'Data Structures', icon: Layers },
-  { id: 'sub2', title: 'Database Systems', icon: Database },
-  { id: 'sub3', title: 'Computer Networks', icon: Network },
-  { id: 'sub4', title: 'Programming in C', icon: Code },
-  { id: 'sub5', title: 'Discrete Mathematics', icon: Calculator },
-  { id: 'sub6', title: 'Web Technologies', icon: FileCode },
-];
 
 export default function SubjectSelection() {
   const navigate = useNavigate();
-  const { setSubject, getBreadcrumb } = useNavigation();
+  const { state, setSubject, getBreadcrumb } = useNavigation();
+  const { toast } = useToast();
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const handleSelect = (subject: string) => {
-    setSubject(subject);
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      if (!state.regulation || !state.branch || !state.year || !state.semester) {
+        toast({
+          title: 'Selection incomplete',
+          description: 'Please select regulation, branch, year, and semester first.',
+          variant: 'destructive',
+        });
+        navigate('/');
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const data = await db.getSubjects(
+          state.regulation,
+          state.branch,
+          state.year,
+          state.semester
+        );
+        setSubjects(data);
+        
+        if (data.length === 0) {
+          toast({
+            title: 'No subjects found',
+            description: 'No subjects available for this selection.',
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching subjects:', error);
+        toast({
+          title: 'Error loading subjects',
+          description: 'Please try again later.',
+          variant: 'destructive',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSubjects();
+  }, [state.regulation, state.branch, state.year, state.semester]);
+
+  const handleSelect = (subject: Subject) => {
+    setSubject(subject.name, subject.id);
     navigate('/materials');
   };
 
@@ -43,16 +78,29 @@ export default function SubjectSelection() {
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-4">
-          {placeholderSubjects.map((subject) => (
-            <SelectionCard
-              key={subject.id}
-              title={subject.title}
-              icon={subject.icon}
-              onClick={() => handleSelect(subject.title)}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center min-h-[40vh]">
+            <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+            <p className="text-muted-foreground">Loading subjects...</p>
+          </div>
+        ) : subjects.length === 0 ? (
+          <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
+            <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
+            <p className="text-muted-foreground">No subjects available</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-4">
+            {subjects.map((subject) => (
+              <SelectionCard
+                key={subject.id}
+                title={subject.name}
+                subtitle={subject.code}
+                icon={BookOpen}
+                onClick={() => handleSelect(subject)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     </PageLayout>
   );
