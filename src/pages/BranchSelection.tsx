@@ -10,18 +10,18 @@ import {
   Cog, 
   Building2, 
   Brain, 
-  MoreHorizontal 
+  Database
 } from 'lucide-react';
 
 const branches = [
   { id: 'IT', title: 'IT', icon: Monitor },
   { id: 'CSE', title: 'CSE', icon: Cpu },
+  { id: 'AIML', title: 'AIML', icon: Brain },
+  { id: 'DS', title: 'DS', icon: Database },
   { id: 'ECE', title: 'ECE', icon: Radio },
   { id: 'EEE', title: 'EEE', icon: Zap },
   { id: 'MECH', title: 'MECH', icon: Cog },
   { id: 'CIVIL', title: 'CIVIL', icon: Building2 },
-  { id: 'AIML', title: 'AIML', icon: Brain },
-  { id: 'Others', title: 'Others', icon: MoreHorizontal },
 ];
 
 export default function BranchSelection() {

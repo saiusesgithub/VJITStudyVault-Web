@@ -24,38 +24,42 @@ export default function Settings() {
       <div className="space-y-6">
         {/* Theme Toggle */}
         <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
               {theme === 'dark' ? (
-                <Moon className="w-5 h-5 text-primary" />
+                <Moon className="w-5 h-5 text-primary flex-shrink-0" />
               ) : (
-                <Sun className="w-5 h-5 text-primary" />
+                <Sun className="w-5 h-5 text-primary flex-shrink-0" />
               )}
-              <div>
+              <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-foreground">Dark Mode</h3>
                 <p className="text-sm text-muted-foreground">Toggle dark/light theme</p>
               </div>
             </div>
-            <Switch
-              checked={theme === 'dark'}
-              onCheckedChange={toggleTheme}
-            />
+            <div className="flex-shrink-0">
+              <Switch
+                checked={theme === 'dark'}
+                onCheckedChange={toggleTheme}
+              />
+            </div>
           </div>
         </div>
 
         {/* Reset Button */}
         <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <RotateCcw className="w-5 h-5 text-primary" />
-              <div>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <RotateCcw className="w-5 h-5 text-primary flex-shrink-0" />
+              <div className="flex-1 min-w-0">
                 <h3 className="font-medium text-foreground">Reset App</h3>
                 <p className="text-sm text-muted-foreground">Clear all selections</p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={handleReset}>
-              Reset
-            </Button>
+            <div className="flex-shrink-0">
+              <Button variant="outline" size="sm" onClick={handleReset}>
+                Reset
+              </Button>
+            </div>
           </div>
         </div>
 
