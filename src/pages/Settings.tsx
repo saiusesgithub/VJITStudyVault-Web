@@ -53,7 +53,7 @@ export default function Settings() {
               <p className="text-xs text-muted-foreground mt-1">24-28 IT Student at VJIT</p>
               <div className="flex gap-3 mt-3">
                 <a
-                  href="https://github.com/saisrujan"
+                  href="https://github.com/saiusesgithub"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -62,7 +62,7 @@ export default function Settings() {
                   <span>GitHub</span>
                 </a>
                 <a
-                  href="https://linkedin.com/in/saisrujan"
+                  href="https://linkedin.com/in/saisrujanpunati"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"

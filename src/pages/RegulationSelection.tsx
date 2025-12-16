@@ -5,8 +5,8 @@ import { useNavigation } from '@/contexts/NavigationContext';
 import { GraduationCap, BookMarked } from 'lucide-react';
 
 const regulations = [
-  { id: 'R22', title: 'R22', subtitle: 'Regulation 2022', icon: GraduationCap },
-  { id: 'R25', title: 'R25', subtitle: 'Regulation 2025', icon: BookMarked },
+  { id: 'R22', title: 'R22', subtitle: 'For 2022, 2023 & 2024 Batches', icon: GraduationCap },
+  { id: 'R25', title: 'R25', subtitle: 'For 2025 Batch Onwards', icon: BookMarked },
 ];
 
 export default function RegulationSelection() {
