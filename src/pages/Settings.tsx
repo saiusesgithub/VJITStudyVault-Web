@@ -1,23 +1,10 @@
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useTheme } from '@/contexts/ThemeContext';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { Moon, Sun, RotateCcw, Info } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
+import { Moon, Sun, Info, Github, Linkedin, User } from 'lucide-react';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
-  const { reset } = useNavigation();
-  const { toast } = useToast();
-
-  const handleReset = () => {
-    reset();
-    toast({
-      title: 'App Reset',
-      description: 'All selections have been cleared.',
-    });
-  };
 
   return (
     <PageLayout title="Settings">
@@ -45,31 +32,45 @@ export default function Settings() {
           </div>
         </div>
 
-        {/* Reset Button */}
-        <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <RotateCcw className="w-5 h-5 text-primary flex-shrink-0" />
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-foreground">Reset App</h3>
-                <p className="text-sm text-muted-foreground">Clear all selections</p>
-              </div>
-            </div>
-            <div className="flex-shrink-0">
-              <Button variant="outline" size="sm" onClick={handleReset}>
-                Reset
-              </Button>
-            </div>
-          </div>
-        </div>
-
         {/* App Info */}
         <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-3">
             <Info className="w-5 h-5 text-primary" />
             <div>
-              <h3 className="font-medium text-foreground">VJIT Study Vault</h3>
+              <h3 className="font-medium gradient-text">VJIT Study Vault</h3>
               <p className="text-sm text-muted-foreground">Version 1.0.0</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Developer Info */}
+        <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <User className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Developed by</h3>
+              <p className="text-sm font-medium gradient-text mt-1">Sai Srujan</p>
+              <p className="text-xs text-muted-foreground mt-1">24-28 IT Student at VJIT</p>
+              <div className="flex gap-3 mt-3">
+                <a
+                  href="https://github.com/saisrujan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                  <span>GitHub</span>
+                </a>
+                <a
+                  href="https://linkedin.com/in/saisrujan"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" />
+                  <span>LinkedIn</span>
+                </a>
+              </div>
             </div>
           </div>
         </div>

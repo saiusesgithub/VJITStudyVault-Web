@@ -22,7 +22,7 @@ export default function SemesterSelection() {
     <PageLayout title="Choose Semester">
       <div className="space-y-6">
         <div className="text-center mb-6">
-          <p className="text-muted-foreground">Select your semester</p>
+          <h2 className="text-xl font-semibold gradient-text mb-2">Select Semester</h2>
         </div>
 
         <div className="grid gap-4">

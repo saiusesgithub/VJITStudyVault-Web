@@ -37,7 +37,7 @@ export default function BranchSelection() {
     <PageLayout title="Choose Branch">
       <div className="space-y-6">
         <div className="text-center mb-6">
-          <p className="text-muted-foreground">Select your department</p>
+          <h2 className="text-xl font-semibold gradient-text mb-2">Select Your Department</h2>
         </div>
 
         <div className="grid grid-cols-2 gap-4">

@@ -63,7 +63,7 @@ export default function SubCategoryPage() {
     <PageLayout title={`${state.subject || 'Subject'} PYQs`}>
       <div className="space-y-6">
         <div className="text-center mb-6">
-          <p className="text-muted-foreground">Select exam year</p>
+          <h2 className="text-xl font-semibold gradient-text mb-2">Select Exam Year</h2>
         </div>
 
         {loading ? (

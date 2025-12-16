@@ -24,7 +24,7 @@ export default function YearSelection() {
     <PageLayout title="Choose Year">
       <div className="space-y-6">
         <div className="text-center mb-6">
-          <p className="text-muted-foreground">Select your academic year</p>
+          <h2 className="text-xl font-semibold gradient-text mb-2">Select Academic Year</h2>
         </div>
 
         <div className="grid gap-4">
