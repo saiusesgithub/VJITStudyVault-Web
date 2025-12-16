@@ -74,7 +74,14 @@ export default function PDFListPage() {
         ) : materials.length === 0 ? (
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
             <FileText className="w-12 h-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No PDFs available</p>
+            <p className="text-foreground font-medium mb-1">No PDFs available yet</p>
+            <p className="text-sm text-muted-foreground mb-4">Be the first to add resources!</p>
+            <a
+              href="#contribute"
+              className="text-sm gradient-text hover:underline"
+            >
+              Share your materials →
+            </a>
           </div>
         ) : (
           materials.map((material) => (
