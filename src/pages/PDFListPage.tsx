@@ -5,6 +5,7 @@ import { useNavigation } from '@/contexts/NavigationContext';
 import { db, Material } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { getSelection } from '@/lib/storage';
+import { trackFileOpen } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { FileText, ExternalLink, Loader2, Youtube } from 'lucide-react';
 
@@ -69,6 +70,24 @@ export default function PDFListPage() {
   };
 
   const handleOpen = (url: string) => {
+    // Find the material being opened
+    const material = materials.find(m => m.url === url);
+    
+    if (material) {
+      // Track the file open event
+      trackFileOpen({
+        regulation: state.regulation!,
+        branch: state.branch!,
+        year: state.year!,
+        sem: state.semester!,
+        subject_name: state.subject!,
+        material_type: state.materialType!,
+        material_name: material.material_name,
+        url: material.url,
+        unit: material.unit,
+      });
+    }
+    
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 

@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NavigationProvider } from "@/contexts/NavigationContext";
+import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 
 import RegulationSelection from "./pages/RegulationSelection";
 import BranchSelection from "./pages/BranchSelection";
@@ -29,6 +30,7 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <GoogleAnalytics />
             <Routes>
               <Route path="/" element={<RegulationSelection />} />
               <Route path="/branch" element={<BranchSelection />} />
