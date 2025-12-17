@@ -205,8 +205,10 @@ Add a "What's New" section in Settings showing recent updates and upcoming featu
 --------------
 
 
-add analytics 
+make some final changes
+create a readme for this and launch this publicly (make a proper version based roadmap like what is planned to be included in the next version)
 
+add a report/not working / suggestions / feedback button/page
 
 --------------
 

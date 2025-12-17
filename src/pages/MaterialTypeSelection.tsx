@@ -109,7 +109,7 @@ export default function MaterialTypeSelection() {
             <p className="text-foreground font-medium mb-1">No materials available yet</p>
             <p className="text-sm text-muted-foreground mb-4">Help us build the library!</p>
             <a
-              href="#contribute"
+              href="/contribute"
               className="text-sm gradient-text hover:underline"
             >
               Contribute materials →

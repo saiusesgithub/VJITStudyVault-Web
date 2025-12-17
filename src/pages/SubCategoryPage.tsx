@@ -83,7 +83,7 @@ export default function SubCategoryPage() {
             <p className="text-foreground font-medium mb-1">No PYQ years available yet</p>
             <p className="text-sm text-muted-foreground mb-4">Help us add previous papers!</p>
             <a
-              href="#contribute"
+              href="/contribute"
               className="text-sm gradient-text hover:underline"
             >
               Contribute PYQs →

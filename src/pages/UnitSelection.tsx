@@ -73,9 +73,7 @@ function UnitSelection() {
             Want to contribute materials?
           </p>
           <a
-            href="https://github.com/saiusesgithub"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="/contribute"
             className="text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-500 underline"
           >
             Contact us on GitHub

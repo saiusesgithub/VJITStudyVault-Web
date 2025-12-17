@@ -89,7 +89,7 @@ export default function SubjectSelection() {
             <p className="text-foreground font-medium mb-1">No subjects available yet</p>
             <p className="text-sm text-muted-foreground mb-4">Be the first to contribute!</p>
             <a
-              href="#contribute"
+              href="/contribute"
               className="text-sm gradient-text hover:underline"
             >
               Help us add materials →
