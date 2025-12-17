@@ -13,6 +13,7 @@ import SemesterSelection from "./pages/SemesterSelection";
 import SubjectSelection from "./pages/SubjectSelection";
 import MaterialTypeSelection from "./pages/MaterialTypeSelection";
 import SubCategoryPage from "./pages/SubCategoryPage";
+import UnitSelection from "./pages/UnitSelection";
 import PDFListPage from "./pages/PDFListPage";
 import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/subjects" element={<SubjectSelection />} />
               <Route path="/materials" element={<MaterialTypeSelection />} />
               <Route path="/subcategory" element={<SubCategoryPage />} />
+              <Route path="/units" element={<UnitSelection />} />
               <Route path="/pdfs" element={<PDFListPage />} />
               <Route path="/labs" element={<Labs />} />
               <Route path="/settings" element={<Settings />} />

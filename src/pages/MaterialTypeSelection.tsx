@@ -14,7 +14,8 @@ import {
   FlaskConical, 
   BookOpen, 
   Presentation,
-  Loader2
+  Loader2,
+  Youtube
 } from 'lucide-react';
 
 const iconMap: Record<string, any> = {
@@ -26,6 +27,7 @@ const iconMap: Record<string, any> = {
   'FlaskConical': FlaskConical,
   'BookOpen': BookOpen,
   'Presentation': Presentation,
+  'Youtube': Youtube,
 };
 
 export default function MaterialTypeSelection() {
@@ -75,10 +77,15 @@ export default function MaterialTypeSelection() {
   }, [state.subjectId]);
 
   const handleSelect = (type: MaterialType) => {
-    setMaterialType(type.name, type.id);
-    if (type.has_subcategory) {
+    setMaterialType(type.name, type.id, type.has_units);
+    if (type.has_units) {
+      // For Notes and YouTube Videos, go to unit selection
+      navigate('/units');
+    } else if (type.has_subcategory) {
+      // For PYQs, go to year selection
       navigate('/subcategory');
     } else {
+      // For others, go directly to materials list
       navigate('/pdfs');
     }
   };

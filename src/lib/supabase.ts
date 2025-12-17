@@ -11,20 +11,20 @@ export const supabase = supabaseUrl && supabaseAnonKey
 // Type definitions
 export interface Subject {
   id: string;
-  regulation: string;
+  regulation: number;  // 22, 25
   branch: string;
-  year: string;
-  semester: string;
+  year: number;  // 1, 2, 3, 4
+  sem: number;  // 1, 2
   name: string;
-  code?: string;
+  credits: number;
   created_at?: string;
 }
 
 export interface MaterialType {
   id: string;
   name: string;
-  has_subcategory: boolean;
-  icon: string; // Icon name for the UI
+  has_units: boolean;  // TRUE for Notes and YouTube Videos
+  icon: string;
   created_at?: string;
 }
 
@@ -33,9 +33,9 @@ export interface Material {
   subject_id: string;
   material_type_id: string;
   name: string;
-  drive_url: string;
-  year_optional?: string; // For PYQs subcategory
-  description?: string;
+  url: string;  // Drive URL or YouTube URL
+  unit?: number;  // For Notes/YouTube Videos: 1, 2, 3, etc.
+  year_optional?: string;  // For PYQs: '2024', '2023', etc.
   created_at?: string;
 }
 
@@ -45,13 +45,18 @@ export const db = {
   getSubjects: async (regulation: string, branch: string, year: string, semester: string) => {
     if (!supabase) throw new Error('Supabase not configured');
     
+    // Convert string values to numbers for new schema
+    const regNum = parseInt(regulation.replace('R', ''));
+    const yearNum = parseInt(year.replace(/\D/g, ''));
+    const semNum = parseInt(semester.replace(/\D/g, ''));
+    
     const { data, error } = await supabase
       .from('subjects')
       .select('*')
-      .eq('regulation', regulation)
+      .eq('regulation', regNum)
       .eq('branch', branch)
-      .eq('year', year)
-      .eq('semester', semester)
+      .eq('year', yearNum)
+      .eq('sem', semNum)
       .order('name');
     
     if (error) throw error;
@@ -82,7 +87,7 @@ export const db = {
         material_types (
           id,
           name,
-          has_subcategory,
+          has_units,
           icon
         )
       `)
@@ -102,8 +107,27 @@ export const db = {
     return uniqueTypes;
   },
 
-  // Get materials (PDFs) for a subject and material type
-  getMaterials: async (subjectId: string, materialTypeId: string, yearOptional?: string) => {
+  // Get available units for Notes or YouTube Videos
+  getAvailableUnits: async (subjectId: string, materialTypeId: string) => {
+    if (!supabase) throw new Error('Supabase not configured');
+    
+    const { data, error } = await supabase
+      .from('materials')
+      .select('unit')
+      .eq('subject_id', subjectId)
+      .eq('material_type_id', materialTypeId)
+      .not('unit', 'is', null)
+      .order('unit');
+    
+    if (error) throw error;
+    
+    // Get unique units
+    const uniqueUnits = [...new Set(data.map(item => item.unit))].filter(Boolean);
+    return uniqueUnits.sort((a, b) => a! - b!) as number[];
+  },
+
+  // Get materials (PDFs/Videos) for a subject and material type
+  getMaterials: async (subjectId: string, materialTypeId: string, unit?: number, yearOptional?: string) => {
     if (!supabase) throw new Error('Supabase not configured');
     
     let query = supabase
@@ -111,6 +135,10 @@ export const db = {
       .select('*')
       .eq('subject_id', subjectId)
       .eq('material_type_id', materialTypeId);
+    
+    if (unit !== undefined) {
+      query = query.eq('unit', unit);
+    }
     
     if (yearOptional) {
       query = query.eq('year_optional', yearOptional);
@@ -125,7 +153,7 @@ export const db = {
   getPYQYears: async (subjectId: string, materialTypeId: string) => {
     if (!supabase) throw new Error('Supabase not configured');
     
-    const { data, error } = await supabase
+    const { data, error} = await supabase
       .from('materials')
       .select('year_optional')
       .eq('subject_id', subjectId)

@@ -6,7 +6,7 @@ import { db, Material } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { getSelection } from '@/lib/storage';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Loader2 } from 'lucide-react';
+import { FileText, ExternalLink, Loader2, Youtube } from 'lucide-react';
 
 export default function PDFListPage() {
   const navigate = useNavigate();
@@ -29,12 +29,13 @@ export default function PDFListPage() {
 
       try {
         setLoading(true);
-        // Get optional year filter (for PYQs)
+        // Get optional year filter (for PYQs) or unit filter (for Notes/YouTube)
         const yearOptional = getSelection('yearOptional');
         const data = await db.getMaterials(
           state.subjectId, 
           state.materialTypeId,
-          yearOptional || undefined
+          yearOptional || undefined,
+          state.selectedUnit || undefined
         );
         setMaterials(data);
         
@@ -57,10 +58,14 @@ export default function PDFListPage() {
     };
 
     fetchMaterials();
-  }, [state.subjectId, state.materialTypeId]);
+  }, [state.subjectId, state.materialTypeId, state.selectedUnit]);
 
-  const handleOpen = (driveUrl: string) => {
-    window.open(driveUrl, '_blank', 'noopener,noreferrer');
+  const isYouTubeLink = (url: string) => {
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
+  const handleOpen = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -84,36 +89,43 @@ export default function PDFListPage() {
             </a>
           </div>
         ) : (
-          materials.map((material) => (
-            <div
-              key={material.id}
-              className="bg-card border border-border/50 rounded-xl p-4 shadow-sm"
-            >
-              <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <FileText className="w-5 h-5 text-primary" />
+          materials.map((material) => {
+            const isYouTube = isYouTubeLink(material.url);
+            return (
+              <div
+                key={material.id}
+                className="bg-card border border-border/50 rounded-xl p-4 shadow-sm"
+              >
+                <div className="flex items-start gap-4">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                    {isYouTube ? (
+                      <Youtube className="w-5 h-5 text-red-500" />
+                    ) : (
+                      <FileText className="w-5 h-5 text-primary" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">{material.name}</h3>
+                    {material.year_optional && (
+                      <p className="text-xs text-muted-foreground mt-1">Year: {material.year_optional}</p>
+                    )}
+                    {material.unit && (
+                      <p className="text-xs text-muted-foreground mt-1">Unit {material.unit}</p>
+                    )}
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleOpen(material.url)}
+                    className="flex-shrink-0 gap-2"
+                  >
+                    Open
+                    <ExternalLink className="w-4 h-4" />
+                  </Button>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-foreground truncate">{material.name}</h3>
-                  {material.description && (
-                    <p className="text-sm text-muted-foreground mt-1">{material.description}</p>
-                  )}
-                  {material.year_optional && (
-                    <p className="text-xs text-muted-foreground mt-1">Year: {material.year_optional}</p>
-                  )}
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => handleOpen(material.drive_url)}
-                  className="flex-shrink-0 gap-2"
-                >
-                  Open
-                  <ExternalLink className="w-4 h-4" />
-                </Button>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </PageLayout>

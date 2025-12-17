@@ -10,6 +10,7 @@ interface NavigationState {
   subjectId: string | null;
   materialType: string | null;
   materialTypeId: string | null;
+  selectedUnit: number | null;  // For Notes/YouTube Videos
 }
 
 interface NavigationContextType {
@@ -19,7 +20,8 @@ interface NavigationContextType {
   setYear: (value: string) => void;
   setSemester: (value: string) => void;
   setSubject: (value: string, id: string) => void;
-  setMaterialType: (value: string, id: string) => void;
+  setMaterialType: (value: string, id: string, hasUnits: boolean) => void;
+  setSelectedUnit: (unit: number) => void;
   reset: () => void;
   getBreadcrumb: () => string;
 }
@@ -33,6 +35,7 @@ const initialState: NavigationState = {
   subjectId: null,
   materialType: null,
   materialTypeId: null,
+  selectedUnit: null,
 };
 
 const NavigationContext = createContext<NavigationContextType | undefined>(undefined);
@@ -69,10 +72,20 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     saveSelection('subjectId', id);
   };
 
-  const setMaterialType = (value: string, id: string) => {
+  const setMaterialType = (value: string, id: string, hasUnits: boolean) => {
     setState(prev => ({ ...prev, materialType: value, materialTypeId: id }));
     saveSelection('materialType', value);
     saveSelection('materialTypeId', id);
+    // Clear selected unit when changing material type
+    if (!hasUnits) {
+      setState(prev => ({ ...prev, selectedUnit: null }));
+      saveSelection('selectedUnit', null);
+    }
+  };
+
+  const setSelectedUnit = (unit: number) => {
+    setState(prev => ({ ...prev, selectedUnit: unit }));
+    saveSelection('selectedUnit', unit.toString());
   };
 
   const reset = () => {
@@ -94,6 +107,7 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
       setSemester,
       setSubject,
       setMaterialType,
+      setSelectedUnit,
       reset,
       getBreadcrumb,
     }}>

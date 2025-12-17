@@ -101,7 +101,7 @@ export default function SubjectSelection() {
               <SelectionCard
                 key={subject.id}
                 title={subject.name}
-                subtitle={subject.code}
+                subtitle={`${subject.credits} Credits`}
                 icon={BookOpen}
                 onClick={() => handleSelect(subject)}
               />
