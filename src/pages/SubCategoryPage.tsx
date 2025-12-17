@@ -17,10 +17,10 @@ export default function SubCategoryPage() {
 
   useEffect(() => {
     const fetchYears = async () => {
-      if (!state.subjectId || !state.materialTypeId) {
+      if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject) {
         toast({
           title: 'Selection incomplete',
-          description: 'Please select a subject and material type.',
+          description: 'Please select a subject first.',
           variant: 'destructive',
         });
         navigate('/subjects');
@@ -29,7 +29,13 @@ export default function SubCategoryPage() {
 
       try {
         setLoading(true);
-        const data = await db.getPYQYears(state.subjectId, state.materialTypeId);
+        const data = await db.getAvailableYears(
+          state.regulation,
+          state.branch,
+          state.year,
+          state.semester,
+          state.subject
+        );
         setYears(data);
         
         if (data.length === 0) {
@@ -51,7 +57,7 @@ export default function SubCategoryPage() {
     };
 
     fetchYears();
-  }, [state.subjectId, state.materialTypeId]);
+  }, [state.regulation, state.branch, state.year, state.semester, state.subject]);
 
   const handleSelect = (year: string) => {
     // Store the selected year for filtering in PDFListPage

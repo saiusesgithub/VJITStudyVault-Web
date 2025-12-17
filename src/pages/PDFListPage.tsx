@@ -17,10 +17,10 @@ export default function PDFListPage() {
 
   useEffect(() => {
     const fetchMaterials = async () => {
-      if (!state.subjectId || !state.materialTypeId) {
+      if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject || !state.materialType) {
         toast({
           title: 'Selection incomplete',
-          description: 'Please select a subject and material type.',
+          description: 'Please complete your selection.',
           variant: 'destructive',
         });
         navigate('/subjects');
@@ -29,11 +29,15 @@ export default function PDFListPage() {
 
       try {
         setLoading(true);
-        // Get optional year filter (for PYQs) or unit filter (for Notes/YouTube)
+        // Get optional year filter (for PYQs)
         const yearOptional = getSelection('yearOptional');
         const data = await db.getMaterials(
-          state.subjectId, 
-          state.materialTypeId,
+          state.regulation,
+          state.branch,
+          state.year,
+          state.semester,
+          state.subject,
+          state.materialType,
           yearOptional || undefined,
           state.selectedUnit || undefined
         );
@@ -42,7 +46,7 @@ export default function PDFListPage() {
         if (data.length === 0) {
           toast({
             title: 'No materials found',
-            description: 'No PDFs available for this selection.',
+            description: 'No materials available for this selection.',
           });
         }
       } catch (error) {
@@ -58,7 +62,7 @@ export default function PDFListPage() {
     };
 
     fetchMaterials();
-  }, [state.subjectId, state.materialTypeId, state.selectedUnit]);
+  }, [state.regulation, state.branch, state.year, state.semester, state.subject, state.materialType, state.selectedUnit]);
 
   const isYouTubeLink = (url: string) => {
     return url.includes('youtube.com') || url.includes('youtu.be');
@@ -105,7 +109,7 @@ export default function PDFListPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground truncate">{material.name}</h3>
+                    <h3 className="font-medium text-foreground truncate">{material.material_name}</h3>
                     {material.year_optional && (
                       <p className="text-xs text-muted-foreground mt-1">Year: {material.year_optional}</p>
                     )}

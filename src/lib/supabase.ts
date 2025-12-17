@@ -1,170 +1,224 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Create client with fallback for development without env vars
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey)
-  : null;
-
-// Type definitions
-export interface Subject {
-  id: string;
-  regulation: number;  // 22, 25
-  branch: string;
-  year: number;  // 1, 2, 3, 4
-  sem: number;  // 1, 2
-  name: string;
-  credits: number;
-  created_at?: string;
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
 }
 
-export interface MaterialType {
-  id: string;
-  name: string;
-  has_units: boolean;  // TRUE for Notes and YouTube Videos
-  icon: string;
-  created_at?: string;
-}
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// =====================================================
+// TYPES - Simple single table approach
+// =====================================================
 
 export interface Material {
   id: string;
-  subject_id: string;
-  material_type_id: string;
-  name: string;
-  url: string;  // Drive URL or YouTube URL
-  unit?: number;  // For Notes/YouTube Videos: 1, 2, 3, etc.
-  year_optional?: string;  // For PYQs: '2024', '2023', etc.
-  created_at?: string;
+  regulation: number;
+  branch: string;
+  year: number;
+  sem: number;
+  subject_name: string;
+  credits: number;
+  material_type: string;
+  material_name: string;
+  url: string;
+  unit?: number;
+  year_optional?: string;
+  created_at: string;
 }
 
-// Database helper functions
+export interface Subject {
+  name: string;
+  credits: number;
+}
+
+export interface MaterialTypeInfo {
+  name: string;
+  has_units: boolean;
+}
+
+// Material type configuration (hardcoded - no DB table needed)
+const MATERIAL_TYPE_CONFIG: Record<string, { icon: string, has_units: boolean }> = {
+  'Notes': { icon: 'FileText', has_units: true },
+  'YouTube Videos': { icon: 'Youtube', has_units: false }, // Playlists open directly, no units
+  'PYQs': { icon: 'Clock', has_units: false },
+  'Question Bank': { icon: 'HelpCircle', has_units: false },
+  'Important Questions': { icon: 'Star', has_units: false },
+  'Syllabus': { icon: 'List', has_units: false },
+  'Lab Manual': { icon: 'FlaskConical', has_units: false },
+  'Reference Books': { icon: 'BookOpen', has_units: false },
+  'PPTs': { icon: 'Presentation', has_units: false },
+};
+
+export const getMaterialTypeIcon = (typeName: string) => {
+  return MATERIAL_TYPE_CONFIG[typeName]?.icon || 'FileText';
+};
+
+export const materialTypeHasUnits = (typeName: string) => {
+  return MATERIAL_TYPE_CONFIG[typeName]?.has_units || false;
+};
+
+// =====================================================
+// DATABASE HELPER FUNCTIONS
+// =====================================================
+
 export const db = {
-  // Get subjects based on user selections
-  getSubjects: async (regulation: string, branch: string, year: string, semester: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    // Convert string values to numbers for new schema
+  // Get unique subjects for a selection
+  getSubjects: async (regulation: string, branch: string, year: string, semester: string): Promise<Subject[]> => {
     const regNum = parseInt(regulation.replace('R', ''));
     const yearNum = parseInt(year.replace(/\D/g, ''));
     const semNum = parseInt(semester.replace(/\D/g, ''));
-    
+
     const { data, error } = await supabase
-      .from('subjects')
+      .from('materials')
+      .select('subject_name, credits')
+      .eq('regulation', regNum)
+      .eq('branch', branch)
+      .eq('year', yearNum)
+      .eq('sem', semNum);
+
+    if (error) throw error;
+
+    // Get unique subjects (same subject name = same subject)
+    const uniqueSubjects = new Map<string, number>();
+    data?.forEach(item => {
+      uniqueSubjects.set(item.subject_name, item.credits);
+    });
+
+    return Array.from(uniqueSubjects.entries())
+      .map(([name, credits]) => ({ name, credits }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  // Get available material types for a subject
+  getAvailableMaterialTypes: async (
+    regulation: string,
+    branch: string,
+    year: string,
+    semester: string,
+    subjectName: string
+  ): Promise<MaterialTypeInfo[]> => {
+    const regNum = parseInt(regulation.replace('R', ''));
+    const yearNum = parseInt(year.replace(/\D/g, ''));
+    const semNum = parseInt(semester.replace(/\D/g, ''));
+
+    const { data, error } = await supabase
+      .from('materials')
+      .select('material_type')
+      .eq('regulation', regNum)
+      .eq('branch', branch)
+      .eq('year', yearNum)
+      .eq('sem', semNum)
+      .eq('subject_name', subjectName);
+
+    if (error) throw error;
+
+    // Get unique material types
+    const uniqueTypes = [...new Set(data?.map(item => item.material_type))];
+    
+    return uniqueTypes.map(name => ({
+      name,
+      has_units: materialTypeHasUnits(name)
+    })).sort((a, b) => a.name.localeCompare(b.name));
+  },
+
+  // Get available units for Notes/YouTube
+  getAvailableUnits: async (
+    regulation: string,
+    branch: string,
+    year: string,
+    semester: string,
+    subjectName: string,
+    materialType: string
+  ): Promise<number[]> => {
+    const regNum = parseInt(regulation.replace('R', ''));
+    const yearNum = parseInt(year.replace(/\D/g, ''));
+    const semNum = parseInt(semester.replace(/\D/g, ''));
+
+    const { data, error } = await supabase
+      .from('materials')
+      .select('unit')
+      .eq('regulation', regNum)
+      .eq('branch', branch)
+      .eq('year', yearNum)
+      .eq('sem', semNum)
+      .eq('subject_name', subjectName)
+      .eq('material_type', materialType)
+      .not('unit', 'is', null);
+
+    if (error) throw error;
+
+    const uniqueUnits = [...new Set(data?.map(item => item.unit).filter(Boolean))];
+    return uniqueUnits.sort((a, b) => a! - b!) as number[];
+  },
+
+  // Get available years for PYQs
+  getAvailableYears: async (
+    regulation: string,
+    branch: string,
+    year: string,
+    semester: string,
+    subjectName: string
+  ): Promise<string[]> => {
+    const regNum = parseInt(regulation.replace('R', ''));
+    const yearNum = parseInt(year.replace(/\D/g, ''));
+    const semNum = parseInt(semester.replace(/\D/g, ''));
+
+    const { data, error } = await supabase
+      .from('materials')
+      .select('year_optional')
+      .eq('regulation', regNum)
+      .eq('branch', branch)
+      .eq('year', yearNum)
+      .eq('sem', semNum)
+      .eq('subject_name', subjectName)
+      .eq('material_type', 'PYQs')
+      .not('year_optional', 'is', null);
+
+    if (error) throw error;
+
+    const uniqueYears = [...new Set(data?.map(item => item.year_optional).filter(Boolean))];
+    return uniqueYears.sort().reverse() as string[];
+  },
+
+  // Get materials
+  getMaterials: async (
+    regulation: string,
+    branch: string,
+    year: string,
+    semester: string,
+    subjectName: string,
+    materialType: string,
+    yearOptional?: string,
+    unit?: number
+  ): Promise<Material[]> => {
+    const regNum = parseInt(regulation.replace('R', ''));
+    const yearNum = parseInt(year.replace(/\D/g, ''));
+    const semNum = parseInt(semester.replace(/\D/g, ''));
+
+    let query = supabase
+      .from('materials')
       .select('*')
       .eq('regulation', regNum)
       .eq('branch', branch)
       .eq('year', yearNum)
       .eq('sem', semNum)
-      .order('name');
-    
-    if (error) throw error;
-    return data as Subject[];
-  },
+      .eq('subject_name', subjectName)
+      .eq('material_type', materialType);
 
-  // Get material types
-  getMaterialTypes: async () => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('material_types')
-      .select('*')
-      .order('name');
-    
-    if (error) throw error;
-    return data as MaterialType[];
-  },
-
-  // Get available material types for a specific subject
-  getAvailableMaterialTypes: async (subjectId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('materials')
-      .select(`
-        material_type_id,
-        material_types (
-          id,
-          name,
-          has_units,
-          icon
-        )
-      `)
-      .eq('subject_id', subjectId);
-    
-    if (error) throw error;
-    
-    // Remove duplicates and flatten structure
-    const uniqueTypes = data.reduce((acc: MaterialType[], item: any) => {
-      const type = item.material_types;
-      if (type && !acc.find(t => t.id === type.id)) {
-        acc.push(type);
-      }
-      return acc;
-    }, []);
-    
-    return uniqueTypes;
-  },
-
-  // Get available units for Notes or YouTube Videos
-  getAvailableUnits: async (subjectId: string, materialTypeId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error } = await supabase
-      .from('materials')
-      .select('unit')
-      .eq('subject_id', subjectId)
-      .eq('material_type_id', materialTypeId)
-      .not('unit', 'is', null)
-      .order('unit');
-    
-    if (error) throw error;
-    
-    // Get unique units
-    const uniqueUnits = [...new Set(data.map(item => item.unit))].filter(Boolean);
-    return uniqueUnits.sort((a, b) => a! - b!) as number[];
-  },
-
-  // Get materials (PDFs/Videos) for a subject and material type
-  getMaterials: async (subjectId: string, materialTypeId: string, unit?: number, yearOptional?: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    let query = supabase
-      .from('materials')
-      .select('*')
-      .eq('subject_id', subjectId)
-      .eq('material_type_id', materialTypeId);
-    
-    if (unit !== undefined) {
-      query = query.eq('unit', unit);
-    }
-    
     if (yearOptional) {
       query = query.eq('year_optional', yearOptional);
     }
-    
-    const { data, error } = await query.order('name');
-    if (error) throw error;
-    return data as Material[];
-  },
 
-  // Get unique years for PYQs subcategory
-  getPYQYears: async (subjectId: string, materialTypeId: string) => {
-    if (!supabase) throw new Error('Supabase not configured');
-    
-    const { data, error} = await supabase
-      .from('materials')
-      .select('year_optional')
-      .eq('subject_id', subjectId)
-      .eq('material_type_id', materialTypeId)
-      .not('year_optional', 'is', null)
-      .order('year_optional', { ascending: false });
-    
+    if (unit !== undefined) {
+      query = query.eq('unit', unit);
+    }
+
+    const { data, error } = await query.order('material_name');
+
     if (error) throw error;
-    
-    // Get unique years
-    const uniqueYears = [...new Set(data.map(item => item.year_optional))].filter(Boolean);
-    return uniqueYears as string[];
-  },
+    return data || [];
+  }
 };

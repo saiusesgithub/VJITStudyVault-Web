@@ -8,9 +8,8 @@ export interface StoredSelections {
   year: string | null;
   semester: string | null;
   subject: string | null;
-  subjectId: string | null; // Store subject ID for fetching materials
   materialType: string | null;
-  materialTypeId: string | null; // Store material type ID
+  selectedUnit: number | null;
   yearOptional: string | null; // For PYQ year filter
 }
 
@@ -20,9 +19,8 @@ const defaultSelections: StoredSelections = {
   year: null,
   semester: null,
   subject: null,
-  subjectId: null,
   materialType: null,
-  materialTypeId: null,
+  selectedUnit: null,
   yearOptional: null,
 };
 

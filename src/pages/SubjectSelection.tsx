@@ -61,7 +61,7 @@ export default function SubjectSelection() {
   }, [state.regulation, state.branch, state.year, state.semester]);
 
   const handleSelect = (subject: Subject) => {
-    setSubject(subject.name, subject.id);
+    setSubject(subject.name);
     navigate('/materials');
   };
 

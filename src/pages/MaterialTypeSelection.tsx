@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { useNavigation } from '@/contexts/NavigationContext';
-import { db, MaterialType } from '@/lib/supabase';
+import { db, MaterialTypeInfo, getMaterialTypeIcon } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { 
   FileText, 
@@ -34,15 +34,15 @@ export default function MaterialTypeSelection() {
   const navigate = useNavigate();
   const { state, setMaterialType } = useNavigation();
   const { toast } = useToast();
-  const [materialTypes, setMaterialTypes] = useState<MaterialType[]>([]);
+  const [materialTypes, setMaterialTypes] = useState<MaterialTypeInfo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMaterialTypes = async () => {
-      if (!state.subjectId) {
+      if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject) {
         toast({
-          title: 'No subject selected',
-          description: 'Please select a subject first.',
+          title: 'Selection incomplete',
+          description: 'Please complete your selection first.',
           variant: 'destructive',
         });
         navigate('/subjects');
@@ -51,8 +51,13 @@ export default function MaterialTypeSelection() {
 
       try {
         setLoading(true);
-        // Get only material types that have content for this subject
-        const data = await db.getAvailableMaterialTypes(state.subjectId);
+        const data = await db.getAvailableMaterialTypes(
+          state.regulation,
+          state.branch,
+          state.year,
+          state.semester,
+          state.subject
+        );
         setMaterialTypes(data);
         
         if (data.length === 0) {
@@ -74,14 +79,14 @@ export default function MaterialTypeSelection() {
     };
 
     fetchMaterialTypes();
-  }, [state.subjectId]);
+  }, [state.regulation, state.branch, state.year, state.semester, state.subject]);
 
-  const handleSelect = (type: MaterialType) => {
-    setMaterialType(type.name, type.id, type.has_units);
+  const handleSelect = (type: MaterialTypeInfo) => {
+    setMaterialType(type.name, type.has_units);
     if (type.has_units) {
       // For Notes and YouTube Videos, go to unit selection
       navigate('/units');
-    } else if (type.has_subcategory) {
+    } else if (type.name === 'PYQs') {
       // For PYQs, go to year selection
       navigate('/subcategory');
     } else {
@@ -113,10 +118,11 @@ export default function MaterialTypeSelection() {
         ) : (
           <div className="grid grid-cols-2 gap-4">
             {materialTypes.map((type) => {
-              const IconComponent = iconMap[type.icon] || FileText;
+              const iconName = getMaterialTypeIcon(type.name);
+              const IconComponent = iconMap[iconName] || FileText;
               return (
                 <SelectionCard
-                  key={type.id}
+                  key={type.name}
                   title={type.name}
                   icon={IconComponent}
                   onClick={() => handleSelect(type)}

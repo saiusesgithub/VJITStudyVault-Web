@@ -6,9 +6,9 @@
 -- Step 1: Insert subjects (skip if exists)
 INSERT INTO subjects (regulation, branch, year, sem, name, credits)
 VALUES 
-  (22, 'IT', 2, 1, 'Probability and Statistics', 4),
-  (22, 'CSE', 2, 1, 'Probability and Statistics', 4),
-  (22, 'DS', 2, 1, 'Probability and Statistics', 4)
+  (22, 'IT', 2, 1, 'PS', 4),
+  (22, 'CSE', 2, 1, 'PS', 4),
+  (22, 'DS', 2, 1, 'PS', 4)
 ON CONFLICT (regulation, branch, year, sem, name) DO NOTHING;
 
 -- Step 2: Insert materials using automatic ID lookup
@@ -25,13 +25,13 @@ DECLARE
 BEGIN
   -- Get subject IDs
   SELECT id INTO subject_id_it FROM subjects 
-  WHERE regulation = 22 AND branch = 'IT' AND year = 2 AND sem = 1 AND name = 'Probability and Statistics';
+  WHERE regulation = 22 AND branch = 'IT' AND year = 2 AND sem = 1 AND name = 'PS';
   
   SELECT id INTO subject_id_cse FROM subjects 
-  WHERE regulation = 22 AND branch = 'CSE' AND year = 2 AND sem = 1 AND name = 'Probability and Statistics';
+  WHERE regulation = 22 AND branch = 'CSE' AND year = 2 AND sem = 1 AND name = 'PS';
   
   SELECT id INTO subject_id_ds FROM subjects 
-  WHERE regulation = 22 AND branch = 'DS' AND year = 2 AND sem = 1 AND name = 'Probability and Statistics';
+  WHERE regulation = 22 AND branch = 'DS' AND year = 2 AND sem = 1 AND name = 'PS';
   
   -- Get material type IDs
   SELECT id INTO notes_type_id FROM material_types WHERE name = 'Notes';
@@ -130,5 +130,5 @@ BEGIN
     (subject_id_cse, youtube_type_id, 'Complete Video Playlist', 'https://youtube.com/playlist?list=PLcejZ7Xxx9YNJH5X_1y-X2_vdihH4MjWF&si=yeA59_SLtKDOISLg'),
     (subject_id_ds, youtube_type_id, 'Complete Video Playlist', 'https://youtube.com/playlist?list=PLcejZ7Xxx9YNJH5X_1y-X2_vdihH4MjWF&si=yeA59_SLtKDOISLg');
 
-  RAISE NOTICE 'Probability and Statistics data inserted successfully!';
+  RAISE NOTICE 'PS data inserted successfully!';
 END $$;

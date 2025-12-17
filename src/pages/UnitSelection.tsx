@@ -13,7 +13,7 @@ function UnitSelection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!state.subjectId || !state.materialTypeId) {
+    if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject || !state.materialType) {
       navigate('/');
       return;
     }
@@ -22,8 +22,12 @@ function UnitSelection() {
       setLoading(true);
       try {
         const availableUnits = await db.getAvailableUnits(
-          state.subjectId!,
-          state.materialTypeId!
+          state.regulation!,
+          state.branch!,
+          state.year!,
+          state.semester!,
+          state.subject!,
+          state.materialType!
         );
         setUnits(availableUnits);
       } catch (error) {
@@ -34,7 +38,7 @@ function UnitSelection() {
     };
 
     fetchUnits();
-  }, [state.subjectId, state.materialTypeId, navigate]);
+  }, [state.regulation, state.branch, state.year, state.semester, state.subject, state.materialType, navigate]);
 
   const handleUnitSelect = (unit: number) => {
     setSelectedUnit(unit);
@@ -78,7 +82,7 @@ function UnitSelection() {
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {units.map((unit) => (
             <SelectionCard
               key={unit}
