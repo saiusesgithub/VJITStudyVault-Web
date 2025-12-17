@@ -46,6 +46,40 @@ interface FileOpenEvent {
   unit?: number;
 }
 
+// Detect device type
+const getDeviceType = (): string => {
+  const ua = navigator.userAgent;
+  if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+    return 'tablet';
+  }
+  if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+    return 'mobile';
+  }
+  return 'desktop';
+};
+
+// Detect browser
+const getBrowser = (): string => {
+  const ua = navigator.userAgent;
+  if (ua.includes('Firefox/')) return 'Firefox';
+  if (ua.includes('Edg/')) return 'Edge';
+  if (ua.includes('Chrome/')) return 'Chrome';
+  if (ua.includes('Safari/') && !ua.includes('Chrome/')) return 'Safari';
+  if (ua.includes('Opera/') || ua.includes('OPR/')) return 'Opera';
+  return 'Other';
+};
+
+// Detect OS
+const getOS = (): string => {
+  const ua = navigator.userAgent;
+  if (ua.includes('Win')) return 'Windows';
+  if (ua.includes('Mac')) return 'MacOS';
+  if (ua.includes('Linux')) return 'Linux';
+  if (ua.includes('Android')) return 'Android';
+  if (ua.includes('iOS') || ua.includes('iPhone') || ua.includes('iPad')) return 'iOS';
+  return 'Other';
+};
+
 // Track when user opens a file
 export const trackFileOpen = async (event: FileOpenEvent) => {
   try {
@@ -60,7 +94,7 @@ export const trackFileOpen = async (event: FileOpenEvent) => {
     });
 
     // Track in Supabase (for custom analytics)
-    await supabase.from('file_opens').insert({
+    const { data, error } = await supabase.from('file_opens').insert({
       regulation: event.regulation,
       branch: event.branch,
       year: event.year,
@@ -70,7 +104,18 @@ export const trackFileOpen = async (event: FileOpenEvent) => {
       material_name: event.material_name,
       url: event.url,
       unit: event.unit,
+      device_type: getDeviceType(),
+      browser: getBrowser(),
+      os: getOS(),
+      screen_width: window.screen.width,
+      screen_height: window.screen.height,
     });
+
+    if (error) {
+      console.error('Supabase insert error:', error);
+    } else {
+      console.log('File open tracked successfully:', event.material_name);
+    }
   } catch (error) {
     // Silently fail - don't break user experience
     console.error('Analytics tracking failed:', error);

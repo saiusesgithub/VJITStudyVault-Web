@@ -75,11 +75,16 @@ export default function PDFListPage() {
     
     if (material) {
       // Track the file open event
+      // Convert all string values to proper integers for database
+      const regulationNum = parseInt(state.regulation?.toString().replace('R', '') || '22');
+      const yearNum = parseInt(state.year?.toString().match(/\d+/)?.[0] || '1'); // Extract number from "2nd Year" -> 2
+      const semesterNum = parseInt(state.semester?.toString().replace('Sem ', '') || '1');
+      
       trackFileOpen({
-        regulation: state.regulation!,
+        regulation: regulationNum,
         branch: state.branch!,
-        year: state.year!,
-        sem: state.semester!,
+        year: yearNum,
+        sem: semesterNum,
         subject_name: state.subject!,
         material_type: state.materialType!,
         material_name: material.material_name,
