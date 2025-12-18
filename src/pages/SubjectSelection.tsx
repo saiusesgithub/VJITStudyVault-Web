@@ -87,7 +87,8 @@ export default function SubjectSelection() {
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
             <BookOpen className="w-12 h-12 text-muted-foreground mb-4" />
             <p className="text-foreground font-medium mb-1">No subjects available yet</p>
-            <p className="text-sm text-muted-foreground mb-4">Be the first to contribute!</p>
+            <p className="text-sm text-muted-foreground mb-6">We're constantly adding new materials. Check back later!</p>
+            <p className="text-sm text-muted-foreground mb-2">Be the first to contribute!</p>
             <a
               href="/contribute"
               className="text-sm gradient-text hover:underline"

@@ -135,8 +135,9 @@ export default function AdminPanel() {
         description: 'Material has been published.',
       });
 
+      // Refresh the list before closing dialog
+      await fetchPendingSubmissions();
       setShowApproveDialog(false);
-      fetchPendingSubmissions();
     } catch (error) {
       console.error('Approval error:', error);
       toast({
@@ -176,8 +177,9 @@ export default function AdminPanel() {
         description: 'Submission has been rejected.',
       });
 
+      // Refresh the list before closing dialog
+      await fetchPendingSubmissions();
       setShowRejectDialog(false);
-      fetchPendingSubmissions();
     } catch (error) {
       console.error('Rejection error:', error);
       toast({

@@ -10,12 +10,13 @@ export function Header({ title }: HeaderProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const hideBackButton = ['/', '/labs', '/settings'].includes(location.pathname);
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 h-14 bg-background/80 backdrop-blur-lg border-b border-border">
       <div className="h-full max-w-lg mx-auto px-4 flex items-center justify-center relative">
         <div className="absolute left-4">
-          {!isHome && (
+          {!hideBackButton && (
             <Button
               variant="ghost"
               size="icon"

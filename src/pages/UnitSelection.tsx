@@ -66,8 +66,11 @@ function UnitSelection() {
 
       {units.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <p className="text-gray-600 dark:text-gray-400 mb-2">
             No units found yet! 📚
+          </p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
+            We're constantly adding new materials. Check back later!
           </p>
           <p className="text-sm text-gray-500 dark:text-gray-500 mb-2">
             Want to contribute materials?

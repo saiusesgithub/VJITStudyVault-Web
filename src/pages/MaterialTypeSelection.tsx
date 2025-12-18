@@ -107,7 +107,8 @@ export default function MaterialTypeSelection() {
           <div className="flex flex-col items-center justify-center min-h-[40vh] text-center">
             <FileText className="w-12 h-12 text-muted-foreground mb-4" />
             <p className="text-foreground font-medium mb-1">No materials available yet</p>
-            <p className="text-sm text-muted-foreground mb-4">Help us build the library!</p>
+            <p className="text-sm text-muted-foreground mb-6">We're constantly adding new materials. Check back later!</p>
+            <p className="text-sm text-muted-foreground mb-2">Help us build the library!</p>
             <a
               href="/contribute"
               className="text-sm gradient-text hover:underline"

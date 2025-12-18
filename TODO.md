@@ -24,9 +24,6 @@
   - Status tracker for submissions
 
 
-
-
-
 - [ ] **Flashcards**
   - Create flashcards
   - Spaced repetition
@@ -82,11 +79,6 @@
 - Show how many times a PDF was accessed
 - "Popular materials" badge
 - Helps students find quality content
-
-### **5. Contribution Page**
-- Form to submit materials (Google Form or custom)
-- Guidelines for formatting, naming conventions
-- Status tracker for submitted materials
 
 ## 🎨 UI/UX Improvements
 
@@ -213,3 +205,9 @@ add a report/not working / suggestions / feedback button/page
 --------------
 
 integrate backbench ai into this
+
+Important - 
+
+PWA
+
+Offline Access
