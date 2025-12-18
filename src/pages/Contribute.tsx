@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabase';
-import { Heart, Loader2, CheckCircle2 } from 'lucide-react';
+import { Heart, Loader2, CheckCircle2, MessageCircle } from 'lucide-react';
 
 export default function Contribute() {
   const navigate = useNavigate();
@@ -132,16 +132,51 @@ export default function Contribute() {
 
   return (
     <PageLayout title="Contribute">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-2xl mx-auto space-y-6">
+        {/* WhatsApp Direct Contact */}
+        <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
+          <div className="flex items-center gap-3 mb-4">
+            <MessageCircle className="w-6 h-6 text-green-500" />
+            <h2 className="text-xl font-bold">Share via WhatsApp</h2>
+          </div>
+          
+          <p className="text-muted-foreground mb-4">
+            Prefer to share materials directly? Send them to us on WhatsApp and we'll add them for you!
+          </p>
+
+          <a
+            href="https://wa.me/917569799199?text=Hi!%20I%20have%20study%20materials%20to%20share%20for%20VJIT%20Study%20Vault"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block"
+          >
+            <Button className="w-full bg-green-500 hover:bg-green-600 text-white">
+              <MessageCircle className="w-4 h-4 mr-2" />
+              Contact on WhatsApp
+            </Button>
+          </a>
+        </div>
+
+        {/* OR Divider */}
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-border"></div>
+          </div>
+          <div className="relative flex justify-center text-sm">
+            <span className="px-4 bg-background text-muted-foreground">OR</span>
+          </div>
+        </div>
+
+        {/* Form Submission */}
         <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
           <div className="flex items-center gap-3 mb-4">
             <Heart className="w-6 h-6 text-red-500" />
-            <h1 className="text-2xl font-bold">Contribute Study Material</h1>
+            <h1 className="text-2xl font-bold">Submit via Form</h1>
           </div>
           
           <p className="text-muted-foreground mb-6">
-            Help fellow students by sharing your study materials! Upload files to your Google Drive 
-            and share the link below. Your submission will be reviewed before publishing.
+            Fill out the form below to submit your materials. Upload files to your Google Drive 
+            and share the link. Your submission will be reviewed before publishing.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

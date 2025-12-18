@@ -97,17 +97,34 @@ export default function SubjectSelection() {
             </a>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
-            {subjects.map((subject) => (
-              <SelectionCard
-                key={subject.id}
-                title={subject.name}
-                subtitle={`${subject.credits} Credits`}
-                icon={BookOpen}
-                onClick={() => handleSelect(subject)}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 gap-4">
+              {subjects.map((subject) => (
+                <SelectionCard
+                  key={subject.id}
+                  title={subject.name}
+                  subtitle={`${subject.credits} Credits`}
+                  icon={BookOpen}
+                  onClick={() => handleSelect(subject)}
+                />
+              ))}
+            </div>
+            
+            {/* Contribute prompt at the bottom - only show if less than 6 subjects */}
+            {subjects.length < 6 && (
+              <div className="mt-8 text-center p-4 border border-border/50 rounded-xl bg-card/50">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Subjects missing? Help us add more!
+                </p>
+                <a
+                  href="/contribute"
+                  className="text-sm gradient-text hover:underline"
+                >
+                  Contribute materials →
+                </a>
+              </div>
+            )}
+          </>
         )}
       </div>
     </PageLayout>
