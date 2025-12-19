@@ -46,6 +46,12 @@ function UnitSelection() {
     navigate('/pdfs');
   };
 
+  const handleReport = () => {
+    const pageInfo = `Page: Units - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
+    const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
+    window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
+  };
+
   if (loading) {
     return (
       <PageLayout title="Select Unit">
