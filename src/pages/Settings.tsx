@@ -1,7 +1,8 @@
 import { PageLayout } from '@/components/layout/PageLayout';
 import { useTheme } from '@/contexts/ThemeContext';
 import { Switch } from '@/components/ui/switch';
-import { Moon, Sun, Info, Github, Linkedin, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Moon, Sun, Info, Github, Linkedin, User, Upload } from 'lucide-react';
 
 export default function Settings() {
   const { theme, toggleTheme } = useTheme();
@@ -28,6 +29,26 @@ export default function Settings() {
                 checked={theme === 'dark'}
                 onCheckedChange={toggleTheme}
               />
+            </div>
+          </div>
+        </div>
+
+        {/* Contribute Section */}
+        <div className="bg-card border border-border/50 rounded-xl p-4 shadow-sm">
+          <div className="flex items-start gap-3">
+            <Upload className="w-5 h-5 text-primary flex-shrink-0" />
+            <div className="flex-1">
+              <h3 className="font-medium text-foreground">Contribute Materials</h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                Help fellow students by sharing your study materials
+              </p>
+              <Button
+                onClick={() => window.location.href = '/contribute'}
+                className="mt-3 w-full sm:w-auto"
+                variant="default"
+              >
+                Contribute Now
+              </Button>
             </div>
           </div>
         </div>
