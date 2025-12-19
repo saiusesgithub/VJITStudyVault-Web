@@ -65,6 +65,12 @@ export default function SubCategoryPage() {
     navigate('/pdfs');
   };
 
+  const handleReport = () => {
+    const pageInfo = `Page: PYQ Years - ${state.subject || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
+    const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
+    window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <PageLayout title={`${state.subject || 'Subject'} PYQs`}>
       <div className="space-y-6">
@@ -100,6 +106,20 @@ export default function SubCategoryPage() {
                 onClick={() => handleSelect(year)}
               />
             ))}
+          </div>
+        )}
+
+        {years.length > 0 && (
+          <div className="mt-6 text-center">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleReport}
+              className="text-xs"
+            >
+              <MessageCircle className="w-3 h-3 mr-2" />
+              Materials not working? Report issue
+            </Button>
           </div>
         )}
       </div>

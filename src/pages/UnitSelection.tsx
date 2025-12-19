@@ -4,7 +4,8 @@ import { useNavigation } from '@/contexts/NavigationContext';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { db } from '@/lib/supabase';
-import { Loader2, BookOpen } from 'lucide-react';
+import { Loader2, BookOpen, MessageCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 function UnitSelection() {
   const navigate = useNavigate();
@@ -83,16 +84,31 @@ function UnitSelection() {
           </a>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {units.map((unit) => (
-            <SelectionCard
-              key={unit}
-              title={`Unit ${unit}`}
-              icon={BookOpen}
-              onClick={() => handleUnitSelect(unit)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {units.map((unit) => (
+              <SelectionCard
+                key={unit}
+                title={`Unit ${unit}`}
+                icon={BookOpen}
+                onClick={() => handleUnitSelect(unit)}
+              />
+            ))}
+          </div>
+
+          {/* Report Button */}
+          <div className="mt-6 text-center">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleReport}
+              className="text-xs"
+            >
+              <MessageCircle className="w-3 h-3 mr-2" />
+              Materials not working? Report issue
+            </Button>
+          </div>
+        </>
       )}
     </PageLayout>
   );

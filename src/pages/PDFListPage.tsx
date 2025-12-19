@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSelection } from '@/lib/storage';
 import { trackFileOpen } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Loader2, Youtube } from 'lucide-react';
+import { FileText, ExternalLink, Loader2, Youtube, MessageCircle } from 'lucide-react';
 
 export default function PDFListPage() {
   const navigate = useNavigate();
@@ -96,6 +96,12 @@ export default function PDFListPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleReport = () => {
+    const pageInfo = `Page: Materials - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
+    const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
+    window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <PageLayout title={`${state.materialType || 'Materials'} – ${state.subject || 'Subject'}`}>
       <div className="space-y-4">
@@ -155,6 +161,21 @@ export default function PDFListPage() {
               </div>
             );
           })
+        )}
+
+        {/* Report Button */}
+        {materials.length > 0 && (
+          <div className="mt-6 text-center">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={handleReport}
+              className="text-xs"
+            >
+              <MessageCircle className="w-3 h-3 mr-2" />
+              Materials not working? Report issue
+            </Button>
+          </div>
         )}
       </div>
     </PageLayout>
