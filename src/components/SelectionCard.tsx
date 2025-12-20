@@ -46,8 +46,8 @@ export function SelectionCard({
         )}
         <div className="min-w-0 flex-1">
           <h3 className={cn(
-            'font-semibold text-foreground break-words',
-            large ? 'text-xl' : 'text-base'
+            'font-semibold text-foreground',
+            large ? 'text-xl break-words' : 'text-sm truncate'
           )}>
             {title}
           </h3>
