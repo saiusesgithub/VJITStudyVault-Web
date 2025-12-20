@@ -28,7 +28,7 @@ export function Header({ title }: HeaderProps) {
           )}
         </div>
 
-        <h1 className="text-xl font-bold truncate gradient-text">{title}</h1>
+        <h1 className="text-xl font-bold text-center px-12 gradient-text">{title}</h1>
       </div>
     </header>
   );
