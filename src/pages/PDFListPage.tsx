@@ -140,7 +140,7 @@ export default function PDFListPage() {
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-foreground break-words">{material.material_name}</h3>
+                    <h3 className="font-medium text-foreground text-sm md:text-base truncate">{material.material_name}</h3>
                     {material.year_optional && (
                       <p className="text-xs text-muted-foreground mt-1">Year: {material.year_optional}</p>
                     )}
