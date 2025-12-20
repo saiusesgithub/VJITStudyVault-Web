@@ -1,8 +1,11 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { useNavigation } from '@/contexts/NavigationContext';
-import { Calendar } from 'lucide-react';
+import { Calendar, FileText, ExternalLink } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { Button } from '@/components/ui/button';
 
 const years = [
   { id: '1st Year', title: '1st Year' },
@@ -13,11 +16,43 @@ const years = [
 
 export default function YearSelection() {
   const navigate = useNavigate();
-  const { setYear } = useNavigation();
+  const { state, setYear } = useNavigation();
+  const [syllabusUrl, setSyllabusUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSyllabus = async () => {
+      if (!state.regulation || !state.branch) return;
+
+      try {
+        const { data, error } = await supabase
+          .from('materials')
+          .select('url')
+          .eq('regulation', state.regulation)
+          .eq('branch', state.branch)
+          .eq('material_type', 'Syllabus')
+          .limit(1)
+          .single();
+
+        if (data && !error) {
+          setSyllabusUrl(data.url);
+        }
+      } catch (error) {
+        console.error('Error fetching syllabus:', error);
+      }
+    };
+
+    fetchSyllabus();
+  }, [state.regulation, state.branch]);
 
   const handleSelect = (year: string) => {
     setYear(year);
     navigate('/semester');
+  };
+
+  const handleOpenSyllabus = () => {
+    if (syllabusUrl) {
+      window.open(syllabusUrl, '_blank', 'noopener,noreferrer');
+    }
   };
 
   return (
@@ -37,6 +72,31 @@ export default function YearSelection() {
             />
           ))}
         </div>
+
+        {syllabusUrl && (
+          <div className="mt-8 bg-card border border-border/50 rounded-xl p-4 shadow-sm">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-medium text-foreground mb-1">Complete Syllabus</h3>
+                <p className="text-sm text-muted-foreground mb-3">
+                  {state.branch} - R{state.regulation} (All Years & Semesters)
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleOpenSyllabus}
+                  className="gap-2"
+                >
+                  View Syllabus
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </PageLayout>
   );

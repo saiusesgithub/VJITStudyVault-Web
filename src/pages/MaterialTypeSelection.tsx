@@ -117,7 +117,7 @@ export default function MaterialTypeSelection() {
             </a>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             {materialTypes.map((type) => {
               const iconName = getMaterialTypeIcon(type.name);
               const IconComponent = iconMap[iconName] || FileText;
