@@ -46,7 +46,10 @@ export const getStoredSelections = (): StoredSelections => {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
-      return { ...defaultSelections, ...JSON.parse(stored) };
+      const data = { ...defaultSelections, ...JSON.parse(stored) };
+      // Convert empty strings to null to prevent query issues
+      if (data.yearOptional === '') data.yearOptional = null;
+      return data;
     }
   } catch (error) {
     console.error('Error reading from localStorage:', error);
