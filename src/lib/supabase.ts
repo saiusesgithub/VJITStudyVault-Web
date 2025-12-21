@@ -208,12 +208,10 @@ export const db = {
       .eq('subject_name', subjectName)
       .eq('material_type', materialType);
 
-    // Only filter by year_optional if provided and not empty (for PYQs with specific years)
-    if (yearOptional && yearOptional.trim() !== '') {
+    if (yearOptional) {
       query = query.eq('year_optional', yearOptional);
     }
 
-    // Only filter by unit if provided (for Notes/Videos with units)
     if (unit !== undefined) {
       query = query.eq('unit', unit);
     }

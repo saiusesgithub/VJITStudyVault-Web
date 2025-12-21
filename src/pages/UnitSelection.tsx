@@ -6,7 +6,6 @@ import { SelectionCard } from '@/components/SelectionCard';
 import { db } from '@/lib/supabase';
 import { Loader2, BookOpen, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { saveSelection } from '@/lib/storage';
 
 function UnitSelection() {
   const navigate = useNavigate();
@@ -15,9 +14,6 @@ function UnitSelection() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Clear yearOptional when entering unit selection (for Notes/Videos)
-    saveSelection('yearOptional', null);
-    
     if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject || !state.materialType) {
       navigate('/');
       return;

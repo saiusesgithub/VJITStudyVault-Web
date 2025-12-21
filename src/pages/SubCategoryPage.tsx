@@ -5,9 +5,8 @@ import { SelectionCard } from '@/components/SelectionCard';
 import { useNavigation } from '@/contexts/NavigationContext';
 import { db } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Loader2, MessageCircle } from 'lucide-react';
+import { Calendar, Loader2 } from 'lucide-react';
 import { saveSelection } from '@/lib/storage';
-import { Button } from '@/components/ui/button';
 
 export default function SubCategoryPage() {
   const navigate = useNavigate();
@@ -98,7 +97,7 @@ export default function SubCategoryPage() {
             </a>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {years.map((year) => (
               <SelectionCard
                 key={year}
