@@ -208,7 +208,8 @@ export const db = {
       .eq('subject_name', subjectName)
       .eq('material_type', materialType);
 
-    if (yearOptional) {
+    // Only filter by year_optional if it has a non-empty value
+    if (yearOptional && yearOptional.trim() !== '') {
       query = query.eq('year_optional', yearOptional);
     }
 
