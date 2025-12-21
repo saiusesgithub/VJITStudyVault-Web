@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSelection } from '@/lib/storage';
 import { trackFileOpen } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Loader2, Youtube, MessageCircle } from 'lucide-react';
+import { FileText, ExternalLink, Loader2, Youtube, MessageCircle, Download } from 'lucide-react';
 
 export default function PDFListPage() {
   const navigate = useNavigate();
@@ -96,6 +96,19 @@ export default function PDFListPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleDownload = (url: string) => {
+    // Convert Google Drive view URL to download URL
+    if (url.includes('drive.google.com')) {
+      const fileId = url.match(/[-\w]{25,}/);
+      if (fileId) {
+        window.open(`https://drive.google.com/uc?export=download&id=${fileId[0]}`, '_blank');
+        return;
+      }
+    }
+    // For non-Drive URLs, open directly
+    window.open(url, '_blank');
+  };
+
   const handleReport = () => {
     const pageInfo = `Page: Materials - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
     const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
@@ -148,15 +161,25 @@ export default function PDFListPage() {
                       <p className="text-xs text-muted-foreground mt-1">Unit {material.unit}</p>
                     )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpen(material.url)}
-                    className="flex-shrink-0 gap-2"
-                  >
-                    Open
-                    <ExternalLink className="w-4 h-4" />
-                  </Button>
+                  <div className="flex-shrink-0 flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(material.url)}
+                      className="gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpen(material.url)}
+                      className="gap-2"
+                    >
+                      Open
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );
