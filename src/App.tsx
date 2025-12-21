@@ -1,13 +1,28 @@
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { cleanupStoredSelections } from "@/lib/storage";
+
+// Component to reset focus on route change
+const FocusResetter = () => {
+  const location = useLocation();
+  
+  useEffect(() => {
+    // Remove focus from any active element when route changes
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+  }, [location.pathname]);
+  
+  return null;
+};
 
 import RegulationSelection from "./pages/RegulationSelection";
 import BranchSelection from "./pages/BranchSelection";
@@ -30,6 +45,15 @@ const App = () => {
   // Cleanup corrupted localStorage on app load
   useEffect(() => {
     cleanupStoredSelections();
+    
+    // Show notice about potential cache issues
+    toast("⚠️ Important Notice", {
+      description: "If materials aren't loading, please try clearing your browser cache or use a different browser. We are working on the issue and it will be resolved soon.",
+      duration: 10000,
+      position: "top-center",
+      dismissible: true,
+      closeButton: true,
+    });
   }, []);
 
   return (
@@ -40,6 +64,7 @@ const App = () => {
           <Toaster />
           <Sonner />
           <BrowserRouter>
+            <FocusResetter />
             <GoogleAnalytics />
             <Routes>
               <Route path="/" element={<RegulationSelection />} />
