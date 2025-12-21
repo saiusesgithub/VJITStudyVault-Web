@@ -1,14 +1,11 @@
 import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
-import { toast } from "sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { NavigationProvider } from "@/contexts/NavigationContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { cleanupStoredSelections } from "@/lib/storage";
 
 // Component to reset focus on route change
 const FocusResetter = () => {
@@ -42,40 +39,27 @@ import NotFound from "./pages/NotFound";
 const queryClient = new QueryClient();
 
 const App = () => {
-  // Cleanup corrupted localStorage on app load
-  useEffect(() => {
-    cleanupStoredSelections();
-    
-    // Show notice about potential cache issues
-    toast("⚠️ Important Notice", {
-      description: "If materials aren't loading, please try clearing your browser cache or use a different browser. We are working on the issue and it will be resolved soon.",
-      duration: 10000,
-      position: "top-center",
-      dismissible: true,
-      closeButton: true,
-    });
-  }, []);
-
   return (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <NavigationProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
           <BrowserRouter>
             <FocusResetter />
             <GoogleAnalytics />
             <Routes>
               <Route path="/" element={<RegulationSelection />} />
-              <Route path="/branch" element={<BranchSelection />} />
-              <Route path="/year" element={<YearSelection />} />
-              <Route path="/semester" element={<SemesterSelection />} />
-              <Route path="/subjects" element={<SubjectSelection />} />
-              <Route path="/materials" element={<MaterialTypeSelection />} />
-              <Route path="/subcategory" element={<SubCategoryPage />} />
-              <Route path="/units" element={<UnitSelection />} />
-              <Route path="/pdfs" element={<PDFListPage />} />
+              <Route path="/:regulation" element={<BranchSelection />} />
+              <Route path="/:regulation/:branch" element={<YearSelection />} />
+              <Route path="/:regulation/:branch/:year" element={<SemesterSelection />} />
+              <Route path="/:regulation/:branch/:year/:semester" element={<SubjectSelection />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject" element={<MaterialTypeSelection />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject/:materialType/units" element={<UnitSelection />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject/:materialType/units/:unit" element={<PDFListPage />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject/:materialType/years" element={<SubCategoryPage />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject/:materialType/years/:yearOptional" element={<PDFListPage />} />
+              <Route path="/:regulation/:branch/:year/:semester/:subject/:materialType" element={<PDFListPage />} />
               <Route path="/labs" element={<Labs />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/contribute" element={<Contribute />} />
@@ -84,7 +68,6 @@ const App = () => {
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
-      </NavigationProvider>
     </ThemeProvider>
   </QueryClientProvider>
   );

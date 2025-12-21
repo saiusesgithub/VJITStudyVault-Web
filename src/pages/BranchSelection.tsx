@@ -1,7 +1,6 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { 
   Monitor, 
   Cpu, 
@@ -14,23 +13,22 @@ import {
 } from 'lucide-react';
 
 const branches = [
-  { id: 'IT', title: 'IT', icon: Monitor },
-  { id: 'CSE', title: 'CSE', icon: Cpu },
-  { id: 'AIML', title: 'AIML', icon: Brain },
-  { id: 'DS', title: 'DS', icon: Database },
-  { id: 'ECE', title: 'ECE', icon: Radio },
-  { id: 'EEE', title: 'EEE', icon: Zap },
-  { id: 'MECH', title: 'MECH', icon: Cog },
-  { id: 'CIVIL', title: 'CIVIL', icon: Building2 },
+  { id: 'it', title: 'IT', icon: Monitor },
+  { id: 'cse', title: 'CSE', icon: Cpu },
+  { id: 'aiml', title: 'AIML', icon: Brain },
+  { id: 'ds', title: 'DS', icon: Database },
+  { id: 'ece', title: 'ECE', icon: Radio },
+  { id: 'eee', title: 'EEE', icon: Zap },
+  { id: 'mech', title: 'MECH', icon: Cog },
+  { id: 'civil', title: 'CIVIL', icon: Building2 },
 ];
 
 export default function BranchSelection() {
   const navigate = useNavigate();
-  const { setBranch } = useNavigation();
+  const { regulation } = useParams<{ regulation: string }>();
 
   const handleSelect = (branch: string) => {
-    setBranch(branch);
-    navigate('/year');
+    navigate(`/${regulation}/${branch}`);
   };
 
   return (

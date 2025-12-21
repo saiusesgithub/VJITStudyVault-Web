@@ -1,8 +1,7 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { db, Subject } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -12,14 +11,14 @@ import {
 
 export default function SubjectSelection() {
   const navigate = useNavigate();
-  const { state, setSubject, getBreadcrumb } = useNavigation();
+  const { regulation, branch, year, semester } = useParams<{ regulation: string; branch: string; year: string; semester: string }>();
   const { toast } = useToast();
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      if (!state.regulation || !state.branch || !state.year || !state.semester) {
+      if (!regulation || !branch || !year || !semester) {
         toast({
           title: 'Selection incomplete',
           description: 'Please select regulation, branch, year, and semester first.',
@@ -32,10 +31,10 @@ export default function SubjectSelection() {
       try {
         setLoading(true);
         const data = await db.getSubjects(
-          state.regulation,
-          state.branch,
-          state.year,
-          state.semester
+          regulation.toUpperCase(),
+          branch.toUpperCase(),
+          `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`,
+          `Sem ${semester}`
         );
         setSubjects(data);
         
@@ -58,14 +57,13 @@ export default function SubjectSelection() {
     };
 
     fetchSubjects();
-  }, [state.regulation, state.branch, state.year, state.semester]);
+  }, [regulation, branch, year, semester]);
 
   const handleSelect = (subject: Subject) => {
-    setSubject(subject.name);
-    navigate('/materials');
+    navigate(`/${regulation}/${branch}/${year}/${semester}/${subject.name.toLowerCase().replace(/\s+/g, '-')}`);
   };
 
-  const breadcrumb = getBreadcrumb();
+  const breadcrumb = `${regulation?.toUpperCase()} • ${branch?.toUpperCase()} • ${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year • Sem ${semester}`;
 
   return (
     <PageLayout title="Subjects">

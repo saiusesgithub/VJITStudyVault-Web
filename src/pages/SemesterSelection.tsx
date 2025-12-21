@@ -1,21 +1,19 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { BookOpen } from 'lucide-react';
 
 const semesters = [
-  { id: 'Sem 1', title: 'Semester 1' },
-  { id: 'Sem 2', title: 'Semester 2' },
+  { id: '1', title: 'Semester 1' },
+  { id: '2', title: 'Semester 2' },
 ];
 
 export default function SemesterSelection() {
   const navigate = useNavigate();
-  const { setSemester } = useNavigation();
+  const { regulation, branch, year } = useParams<{ regulation: string; branch: string; year: string }>();
 
   const handleSelect = (semester: string) => {
-    setSemester(semester);
-    navigate('/subjects');
+    navigate(`/${regulation}/${branch}/${year}/${semester}`);
   };
 
   return (

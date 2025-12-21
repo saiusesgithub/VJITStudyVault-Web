@@ -1,8 +1,7 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { db, MaterialTypeInfo, getMaterialTypeIcon } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -32,31 +31,53 @@ const iconMap: Record<string, any> = {
 
 export default function MaterialTypeSelection() {
   const navigate = useNavigate();
-  const { state, setMaterialType } = useNavigation();
+  const { regulation, branch, year, semester, subject } = useParams<{ regulation: string; branch: string; year: string; semester: string; subject: string }>();
   const { toast } = useToast();
   const [materialTypes, setMaterialTypes] = useState<MaterialTypeInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [actualSubjectName, setActualSubjectName] = useState<string>('');
 
   useEffect(() => {
     const fetchMaterialTypes = async () => {
-      if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject) {
+      if (!regulation || !branch || !year || !semester || !subject) {
         toast({
           title: 'Selection incomplete',
           description: 'Please complete your selection first.',
           variant: 'destructive',
         });
-        navigate('/subjects');
+        navigate('/');
         return;
       }
 
       try {
         setLoading(true);
+        // First get all subjects to match the URL slug to actual name
+        const subjects = await db.getSubjects(
+          regulation.toUpperCase(),
+          branch.toUpperCase(),
+          `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`,
+          `Sem ${semester}`
+        );
+        
+        const matchedSubject = subjects.find(s => s.name.toLowerCase().replace(/\s+/g, '-') === subject);
+        if (!matchedSubject) {
+          toast({
+            title: 'Subject not found',
+            description: 'Could not find the selected subject.',
+            variant: 'destructive',
+          });
+          navigate('/');
+          return;
+        }
+        
+        setActualSubjectName(matchedSubject.name);
+        
         const data = await db.getAvailableMaterialTypes(
-          state.regulation,
-          state.branch,
-          state.year,
-          state.semester,
-          state.subject
+          regulation.toUpperCase(),
+          branch.toUpperCase(),
+          `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`,
+          `Sem ${semester}`,
+          matchedSubject.name
         );
         setMaterialTypes(data);
         
@@ -79,24 +100,24 @@ export default function MaterialTypeSelection() {
     };
 
     fetchMaterialTypes();
-  }, [state.regulation, state.branch, state.year, state.semester, state.subject]);
+  }, [regulation, branch, year, semester, subject]);
 
   const handleSelect = (type: MaterialTypeInfo) => {
-    setMaterialType(type.name, type.has_units);
+    const materialTypeSlug = type.name.toLowerCase().replace(/\s+/g, '-');
     if (type.has_units) {
       // For Notes and YouTube Videos, go to unit selection
-      navigate('/units');
+      navigate(`/${regulation}/${branch}/${year}/${semester}/${subject}/${materialTypeSlug}/units`);
     } else if (type.name === 'PYQs') {
       // For PYQs, go to year selection
-      navigate('/subcategory');
+      navigate(`/${regulation}/${branch}/${year}/${semester}/${subject}/${materialTypeSlug}/years`);
     } else {
       // For others, go directly to materials list
-      navigate('/pdfs');
+      navigate(`/${regulation}/${branch}/${year}/${semester}/${subject}/${materialTypeSlug}`);
     }
   };
 
   return (
-    <PageLayout title={`${state.subject || 'Subject'} Materials`}>
+    <PageLayout title={`${actualSubjectName || 'Subject'} Materials`}>
       <div className="space-y-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center min-h-[40vh]">
