@@ -7,7 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { getSelection } from '@/lib/storage';
 import { trackFileOpen } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
-import { FileText, ExternalLink, Loader2, Youtube, MessageCircle } from 'lucide-react';
+import { FileText, ExternalLink, Loader2, Youtube, MessageCircle, Download } from 'lucide-react';
 
 export default function PDFListPage() {
   const navigate = useNavigate();
@@ -96,6 +96,22 @@ export default function PDFListPage() {
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
+  const handleDownload = (url: string) => {
+    // For Google Drive files, modify URL to force download
+    let downloadUrl = url;
+    
+    if (url.includes('drive.google.com')) {
+      // Extract file ID from various Google Drive URL formats
+      const fileIdMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
+      if (fileIdMatch && fileIdMatch[1]) {
+        // Use direct download link format
+        downloadUrl = `https://drive.google.com/uc?export=download&id=${fileIdMatch[1]}`;
+      }
+    }
+    
+    window.open(downloadUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const handleReport = () => {
     const pageInfo = `Page: Materials - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
     const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
@@ -148,15 +164,26 @@ export default function PDFListPage() {
                       <p className="text-xs text-muted-foreground mt-1">Unit {material.unit}</p>
                     )}
                   </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleOpen(material.url)}
-                    className="flex-shrink-0 gap-2"
-                  >
-                    Open
-                    <ExternalLink className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownload(material.url)}
+                      className="flex-shrink-0 px-2"
+                      title="Download"
+                    >
+                      <Download className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpen(material.url)}
+                      className="flex-shrink-0 gap-2"
+                    >
+                      Open
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
             );

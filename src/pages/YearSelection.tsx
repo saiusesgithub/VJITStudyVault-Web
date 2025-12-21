@@ -24,10 +24,13 @@ export default function YearSelection() {
       if (!state.regulation || !state.branch) return;
 
       try {
+        // Convert R22 to 22 for database query
+        const regNum = parseInt(state.regulation.replace('R', ''));
+        
         const { data, error } = await supabase
           .from('materials')
           .select('url')
-          .eq('regulation', state.regulation)
+          .eq('regulation', regNum)
           .eq('branch', state.branch)
           .eq('material_type', 'Syllabus')
           .limit(1)
