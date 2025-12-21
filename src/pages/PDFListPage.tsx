@@ -1,46 +1,89 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
-import { useNavigation } from '@/contexts/NavigationContext';
 import { db, Material } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
-import { getSelection } from '@/lib/storage';
 import { trackFileOpen } from '@/lib/analytics';
 import { Button } from '@/components/ui/button';
 import { FileText, ExternalLink, Loader2, Youtube, MessageCircle, Download } from 'lucide-react';
+import { formatYearForDB, formatSemesterForDB, toUpperCase } from '@/lib/urlHelpers';
 
 export default function PDFListPage() {
   const navigate = useNavigate();
-  const { state } = useNavigation();
+  const { regulation, branch, year, semester, subject, materialType, unit, yearOptional } = useParams();
   const { toast } = useToast();
   const [materials, setMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subjectName, setSubjectName] = useState<string>('');
+  const [materialTypeName, setMaterialTypeName] = useState<string>('');
 
   useEffect(() => {
     const fetchMaterials = async () => {
-      if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject || !state.materialType) {
+      if (!regulation || !branch || !year || !semester || !subject || !materialType) {
         toast({
           title: 'Selection incomplete',
           description: 'Please complete your selection.',
           variant: 'destructive',
         });
-        navigate('/subjects');
+        navigate('/');
         return;
       }
 
       try {
         setLoading(true);
-        // Get optional year filter (for PYQs)
-        const yearOptional = getSelection('yearOptional');
+        
+        // Get actual subject name from DB
+        const subjects = await db.getSubjects(
+          toUpperCase(regulation),
+          toUpperCase(branch),
+          formatYearForDB(year),
+          formatSemesterForDB(semester)
+        );
+        const matchedSubject = subjects.find(s => s.name.toLowerCase().replace(/\s+/g, '-') === subject);
+        
+        if (!matchedSubject) {
+          toast({
+            title: 'Subject not found',
+            description: 'Could not find the selected subject.',
+            variant: 'destructive',
+          });
+          navigate('/');
+          return;
+        }
+        
+        setSubjectName(matchedSubject.name);
+        
+        // Get material type name
+        const materialTypes = await db.getAvailableMaterialTypes(
+          toUpperCase(regulation),
+          toUpperCase(branch),
+          formatYearForDB(year),
+          formatSemesterForDB(semester),
+          matchedSubject.name
+        );
+        const matchedMaterialType = materialTypes.find(mt => mt.name.toLowerCase().replace(/\s+/g, '-') === materialType);
+        
+        if (!matchedMaterialType) {
+          toast({
+            title: 'Material type not found',
+            description: 'Could not find the selected material type.',
+            variant: 'destructive',
+          });
+          navigate('/');
+          return;
+        }
+        
+        setMaterialTypeName(matchedMaterialType.name);
+        
         const data = await db.getMaterials(
-          state.regulation,
-          state.branch,
-          state.year,
-          state.semester,
-          state.subject,
-          state.materialType,
+          toUpperCase(regulation),
+          toUpperCase(branch),
+          formatYearForDB(year),
+          formatSemesterForDB(semester),
+          matchedSubject.name,
+          matchedMaterialType.name,
           yearOptional || undefined,
-          state.selectedUnit || undefined
+          unit ? parseInt(unit) : undefined
         );
         setMaterials(data);
         
@@ -63,7 +106,7 @@ export default function PDFListPage() {
     };
 
     fetchMaterials();
-  }, [state.regulation, state.branch, state.year, state.semester, state.subject, state.materialType, state.selectedUnit]);
+  }, [regulation, branch, year, semester, subject, materialType, unit, yearOptional]);
 
   const isYouTubeLink = (url: string) => {
     return url.includes('youtube.com') || url.includes('youtu.be');
@@ -75,18 +118,17 @@ export default function PDFListPage() {
     
     if (material) {
       // Track the file open event
-      // Convert all string values to proper integers for database
-      const regulationNum = parseInt(state.regulation?.toString().replace('R', '') || '22');
-      const yearNum = parseInt(state.year?.toString().match(/\d+/)?.[0] || '1'); // Extract number from "2nd Year" -> 2
-      const semesterNum = parseInt(state.semester?.toString().replace('Sem ', '') || '1');
+      const regulationNum = parseInt(regulation?.replace('r', '') || '22');
+      const yearNum = parseInt(year || '1');
+      const semesterNum = parseInt(semester || '1');
       
       trackFileOpen({
         regulation: regulationNum,
-        branch: state.branch!,
+        branch: toUpperCase(branch!),
         year: yearNum,
         sem: semesterNum,
-        subject_name: state.subject!,
-        material_type: state.materialType!,
+        subject_name: subjectName,
+        material_type: materialTypeName,
         material_name: material.material_name,
         url: material.url,
         unit: material.unit,
@@ -110,13 +152,13 @@ export default function PDFListPage() {
   };
 
   const handleReport = () => {
-    const pageInfo = `Page: Materials - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
+    const pageInfo = `Page: Materials - ${subjectName} - ${materialTypeName} (${toUpperCase(regulation!)}, ${toUpperCase(branch!)}, Year ${year}, Sem ${semester})`;
     const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
     window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <PageLayout title={`${state.materialType || 'Materials'} – ${state.subject || 'Subject'}`}>
+    <PageLayout title={`${materialTypeName || 'Materials'} – ${subjectName || 'Subject'}`}>
       <div className="space-y-4">
         {loading ? (
           <div className="flex flex-col items-center justify-center min-h-[40vh]">

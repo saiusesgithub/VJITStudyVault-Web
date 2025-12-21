@@ -1,20 +1,22 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useNavigation } from '@/contexts/NavigationContext';
+import { useNavigate, useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
 import { db } from '@/lib/supabase';
 import { Loader2, BookOpen, MessageCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatYearForDB, formatSemesterForDB, toUpperCase } from '@/lib/urlHelpers';
 
 function UnitSelection() {
   const navigate = useNavigate();
-  const { state, setSelectedUnit } = useNavigation();
+  const { regulation, branch, year, semester, subject, materialType } = useParams();
   const [units, setUnits] = useState<number[]>([]);
   const [loading, setLoading] = useState(true);
+  const [subjectName, setSubjectName] = useState<string>('');
+  const [materialTypeName, setMaterialTypeName] = useState<string>('');
 
   useEffect(() => {
-    if (!state.regulation || !state.branch || !state.year || !state.semester || !state.subject || !state.materialType) {
+    if (!regulation || !branch || !year || !semester || !subject || !materialType) {
       navigate('/');
       return;
     }
@@ -22,15 +24,42 @@ function UnitSelection() {
     const fetchUnits = async () => {
       setLoading(true);
       try {
-        const availableUnits = await db.getAvailableUnits(
-          state.regulation!,
-          state.branch!,
-          state.year!,
-          state.semester!,
-          state.subject!,
-          state.materialType!
+        // Get actual subject name from DB
+        const subjects = await db.getSubjects(
+          toUpperCase(regulation),
+          toUpperCase(branch),
+          formatYearForDB(year),
+          formatSemesterForDB(semester)
         );
-        setUnits(availableUnits);
+        const matchedSubject = subjects.find(s => s.name.toLowerCase().replace(/\s+/g, '-') === subject);
+        
+        if (matchedSubject) {
+          setSubjectName(matchedSubject.name);
+          
+          // Get material type name
+          const materialTypes = await db.getAvailableMaterialTypes(
+            toUpperCase(regulation),
+            toUpperCase(branch),
+            formatYearForDB(year),
+            formatSemesterForDB(semester),
+            matchedSubject.name
+          );
+          const matchedMaterialType = materialTypes.find(mt => mt.name.toLowerCase().replace(/\s+/g, '-') === materialType);
+          
+          if (matchedMaterialType) {
+            setMaterialTypeName(matchedMaterialType.name);
+            
+            const availableUnits = await db.getAvailableUnits(
+              toUpperCase(regulation),
+              toUpperCase(branch),
+              formatYearForDB(year),
+              formatSemesterForDB(semester),
+              matchedSubject.name,
+              matchedMaterialType.name
+            );
+            setUnits(availableUnits);
+          }
+        }
       } catch (error) {
         console.error('Error fetching units:', error);
       } finally {
@@ -39,15 +68,14 @@ function UnitSelection() {
     };
 
     fetchUnits();
-  }, [state.regulation, state.branch, state.year, state.semester, state.subject, state.materialType, navigate]);
+  }, [regulation, branch, year, semester, subject, materialType, navigate]);
 
   const handleUnitSelect = (unit: number) => {
-    setSelectedUnit(unit);
-    navigate('/pdfs');
+    navigate(`/${regulation}/${branch}/${year}/${semester}/${subject}/${materialType}/units/${unit}`);
   };
 
   const handleReport = () => {
-    const pageInfo = `Page: Units - ${state.subject || ''} - ${state.materialType || ''} (${state.regulation || ''}, ${state.branch || ''}, Year ${state.year || ''}, Sem ${state.semester || ''})`;
+    const pageInfo = `Page: Units - ${subjectName} - ${materialTypeName} (${toUpperCase(regulation!)}, ${toUpperCase(branch!)}, Year ${year}, Sem ${semester})`;
     const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
     window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
   };
@@ -68,7 +96,7 @@ function UnitSelection() {
         Select Unit
       </h1>
       <p className="text-gray-600 dark:text-gray-400 mb-8 text-center">
-        Choose a unit for {state.materialType}
+        Choose a unit for {materialTypeName}
       </p>
 
       {units.length === 0 ? (
