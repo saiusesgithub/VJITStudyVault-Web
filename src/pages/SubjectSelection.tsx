@@ -36,7 +36,9 @@ export default function SubjectSelection() {
           `${year}${year === '1' ? 'st' : year === '2' ? 'nd' : year === '3' ? 'rd' : 'th'} Year`,
           `Sem ${semester}`
         );
-        setSubjects(data);
+        // Sort by credits (high to low)
+        const sortedData = data.sort((a, b) => b.credits - a.credits);
+        setSubjects(sortedData);
         
         if (data.length === 0) {
           toast({

@@ -59,7 +59,7 @@ export default function Settings() {
             <Info className="w-5 h-5 text-primary" />
             <div>
               <h3 className="font-medium gradient-text">VJIT Study Vault</h3>
-              <p className="text-sm text-muted-foreground">Version 1.0.0</p>
+              <p className="text-sm text-muted-foreground">Version 1.1</p>
             </div>
           </div>
         </div>

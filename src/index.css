@@ -5,6 +5,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Disable tap highlight on mobile browsers (Firefox, Safari, etc.) */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
 /* VJIT Study Vault - Red Gradient Design System */
 
 @layer base {
