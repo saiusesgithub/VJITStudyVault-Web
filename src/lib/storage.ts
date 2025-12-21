@@ -24,6 +24,23 @@ const defaultSelections: StoredSelections = {
   yearOptional: null,
 };
 
+// Cleanup function to fix corrupted localStorage from previous versions
+export const cleanupStoredSelections = (): void => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      // Fix empty string yearOptional (should be null)
+      if (data.yearOptional === '') {
+        data.yearOptional = null;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      }
+    }
+  } catch (error) {
+    console.error('Error cleaning localStorage:', error);
+  }
+};
+
 // Get all selections from localStorage
 export const getStoredSelections = (): StoredSelections => {
   try {

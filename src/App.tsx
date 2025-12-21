@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -6,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { NavigationProvider } from "@/contexts/NavigationContext";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { cleanupStoredSelections } from "@/lib/storage";
 
 import RegulationSelection from "./pages/RegulationSelection";
 import BranchSelection from "./pages/BranchSelection";
@@ -24,7 +26,13 @@ import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  // Cleanup corrupted localStorage on app load
+  useEffect(() => {
+    cleanupStoredSelections();
+  }, []);
+
+  return (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <NavigationProvider>
@@ -54,6 +62,7 @@ const App = () => (
       </NavigationProvider>
     </ThemeProvider>
   </QueryClientProvider>
-);
+  );
+};
 
 export default App;
