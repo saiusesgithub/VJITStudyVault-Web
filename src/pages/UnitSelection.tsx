@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { PageLayout } from '@/components/layout/PageLayout';
 import { SelectionCard } from '@/components/SelectionCard';
-import { db } from '@/lib/supabase';
-import { Loader2, BookOpen, MessageCircle } from 'lucide-react';
+import { db, Material } from '@/lib/supabase';
+import { Loader2, BookOpen, MessageCircle, FileText, ExternalLink, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatYearForDB, formatSemesterForDB, toUpperCase } from '@/lib/urlHelpers';
 
@@ -11,6 +11,7 @@ function UnitSelection() {
   const navigate = useNavigate();
   const { regulation, branch, year, semester, subject, materialType } = useParams();
   const [units, setUnits] = useState<number[]>([]);
+  const [generalMaterials, setGeneralMaterials] = useState<Material[]>([]);
   const [loading, setLoading] = useState(true);
   const [subjectName, setSubjectName] = useState<string>('');
   const [materialTypeName, setMaterialTypeName] = useState<string>('');
@@ -58,6 +59,21 @@ function UnitSelection() {
               matchedMaterialType.name
             );
             setUnits(availableUnits);
+            
+            // Fetch materials without unit (general materials like all-in-one notes)
+            const allMaterials = await db.getMaterials(
+              toUpperCase(regulation),
+              toUpperCase(branch),
+              formatYearForDB(year),
+              formatSemesterForDB(semester),
+              matchedSubject.name,
+              matchedMaterialType.name,
+              undefined,
+              undefined
+            );
+            // Filter for materials without a unit
+            const noUnitMaterials = allMaterials.filter(m => m.unit === null);
+            setGeneralMaterials(noUnitMaterials);
           }
         }
       } catch (error) {
@@ -78,6 +94,28 @@ function UnitSelection() {
     const pageInfo = `Page: Units - ${subjectName} - ${materialTypeName} (${toUpperCase(regulation!)}, ${toUpperCase(branch!)}, Year ${year}, Sem ${semester})`;
     const message = encodeURIComponent(`Hi! I'd like to report an issue with materials.\n\n${pageInfo}\n\nIssue: `);
     window.open(`https://wa.me/917569799199?text=${message}`, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownload = (url: string) => {
+    // Handle Google Drive files
+    if (url.includes('drive.google.com/file/d/')) {
+      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1];
+      if (fileId) {
+        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+    }
+    window.open(url, '_blank');
+  };
+
+  const handleOpen = (url: string) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
   };
 
   if (loading) {
@@ -119,15 +157,62 @@ function UnitSelection() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {units.map((unit) => (
-              <SelectionCard
-                key={unit}
-                title={`Unit ${unit}`}
-                icon={BookOpen}
-                onClick={() => handleUnitSelect(unit)}
-              />
-            ))}
+          {/* General Materials (no unit required) */}
+          {generalMaterials.length > 0 && (
+            <div className="mb-8">
+              <h2 className="text-lg font-semibold text-foreground mb-4">General Materials</h2>
+              <div className="space-y-4">
+                {generalMaterials.map((material) => (
+                  <div
+                    key={material.id}
+                    className="bg-card border border-border/50 rounded-xl p-4 shadow-sm"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                        <FileText className="w-5 h-5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-medium text-foreground break-words">{material.material_name}</h3>
+                      </div>
+                      <div className="flex-shrink-0 flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleDownload(material.url)}
+                          className="gap-2"
+                        >
+                          <Download className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleOpen(material.url)}
+                          className="gap-2"
+                        >
+                          Open
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Unit Selection */}
+          <div>
+            <h2 className="text-lg font-semibold text-foreground mb-4">Select by Unit</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {units.map((unit) => (
+                <SelectionCard
+                  key={unit}
+                  title={`Unit ${unit}`}
+                  icon={BookOpen}
+                  onClick={() => handleUnitSelect(unit)}
+                />
+              ))}
+            </div>
           </div>
 
           {/* Report Button */}
