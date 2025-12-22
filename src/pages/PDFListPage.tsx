@@ -139,19 +139,21 @@ export default function PDFListPage() {
   };
 
   const handleDownload = (url: string) => {
+    // Show download started notification
+    toast({
+      title: 'Download started',
+      description: 'Your file is being downloaded...',
+      duration: 4000,
+    });
+
     // Handle Google Drive files
     if (url.includes('drive.google.com/file/d/')) {
       const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1];
       if (fileId) {
         // Use download link that forces download
         const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
-        // Create a temporary link and click it to trigger download
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = '';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Direct navigation works better on mobile
+        window.location.href = downloadUrl;
         return;
       }
     }
