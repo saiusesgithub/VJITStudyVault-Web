@@ -139,14 +139,39 @@ export default function PDFListPage() {
   };
 
   const handleDownload = (url: string) => {
-    // Convert Google Drive view URL to download URL
-    if (url.includes('drive.google.com')) {
-      const fileId = url.match(/[-\w]{25,}/);
+    // Handle Google Drive files
+    if (url.includes('drive.google.com/file/d/')) {
+      const fileId = url.match(/\/file\/d\/([^\/]+)/)?.[1];
       if (fileId) {
-        window.open(`https://drive.google.com/uc?export=download&id=${fileId[0]}`, '_blank');
+        // Use download link that forces download
+        const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+        // Create a temporary link and click it to trigger download
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = '';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
         return;
       }
     }
+    
+    // Handle Google Docs
+    if (url.includes('docs.google.com/document')) {
+      const docId = url.match(/\/document\/d\/([^\/]+)/)?.[1];
+      if (docId) {
+        // Export as PDF
+        window.open(`https://docs.google.com/document/d/${docId}/export?format=pdf`, '_blank');
+        return;
+      }
+    }
+    
+    // Handle Google Drive folders (can't download, just open)
+    if (url.includes('drive.google.com/drive/folders')) {
+      window.open(url, '_blank');
+      return;
+    }
+    
     // For non-Drive URLs, open directly
     window.open(url, '_blank');
   };
