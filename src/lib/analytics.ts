@@ -80,6 +80,155 @@ const getOS = (): string => {
   return 'Other';
 };
 
+// Detect device manufacturer from User Agent
+const getDeviceManufacturer = (): string | null => {
+  const ua = navigator.userAgent.toLowerCase();
+  
+  // Apple devices
+  if (ua.includes('iphone') || ua.includes('ipad') || ua.includes('ipod')) return 'Apple';
+  if (ua.includes('macintosh') || ua.includes('mac os')) return 'Apple';
+  
+  // Samsung
+  if (ua.includes('samsung') || ua.includes('sm-') || ua.includes('galaxy')) return 'Samsung';
+  
+  // Google Pixel
+  if (ua.includes('pixel')) return 'Google';
+  
+  // Xiaomi
+  if (ua.includes('xiaomi') || ua.includes('mi ') || ua.includes('redmi')) return 'Xiaomi';
+  
+  // OnePlus
+  if (ua.includes('oneplus')) return 'OnePlus';
+  
+  // Oppo
+  if (ua.includes('oppo')) return 'Oppo';
+  
+  // Vivo
+  if (ua.includes('vivo')) return 'Vivo';
+  
+  // Realme
+  if (ua.includes('realme')) return 'Realme';
+  
+  // Huawei
+  if (ua.includes('huawei') || ua.includes('honor')) return 'Huawei';
+  
+  // Motorola
+  if (ua.includes('motorola') || ua.includes('moto')) return 'Motorola';
+  
+  // Nokia
+  if (ua.includes('nokia')) return 'Nokia';
+  
+  // LG
+  if (ua.includes('lg-') || ua.includes('lge')) return 'LG';
+  
+  // Sony
+  if (ua.includes('sony')) return 'Sony';
+  
+  // HTC
+  if (ua.includes('htc')) return 'HTC';
+  
+  // Asus
+  if (ua.includes('asus')) return 'Asus';
+  
+  // Lenovo
+  if (ua.includes('lenovo')) return 'Lenovo';
+  
+  // Microsoft Surface
+  if (ua.includes('surface')) return 'Microsoft';
+  
+  // Dell
+  if (ua.includes('dell')) return 'Dell';
+  
+  // HP
+  if (ua.includes('hp ')) return 'HP';
+  
+  return null;
+};
+
+// Detect device model from User Agent
+const getDeviceModel = (): string | null => {
+  const ua = navigator.userAgent;
+  
+  // iPhone models
+  const iphoneMatch = ua.match(/iPhone\s?(\d+[,\s]\d+)?/);
+  if (iphoneMatch) {
+    // Try to get more specific model
+    if (ua.includes('iPhone15')) return 'iPhone 15';
+    if (ua.includes('iPhone14')) return 'iPhone 14';
+    if (ua.includes('iPhone13')) return 'iPhone 13';
+    if (ua.includes('iPhone12')) return 'iPhone 12';
+    if (ua.includes('iPhone11')) return 'iPhone 11';
+    return iphoneMatch[0];
+  }
+  
+  // iPad models
+  const ipadMatch = ua.match(/iPad(\d+[,\s]\d+)?/);
+  if (ipadMatch) return ipadMatch[0];
+  
+  // Samsung Galaxy models
+  const samsungMatch = ua.match(/SM-[A-Z]\d+[A-Z]?/i);
+  if (samsungMatch) return samsungMatch[0];
+  
+  const galaxyMatch = ua.match(/Galaxy\s([A-Z]\d+)/i);
+  if (galaxyMatch) return `Galaxy ${galaxyMatch[1]}`;
+  
+  // Google Pixel models
+  const pixelMatch = ua.match(/Pixel\s?(\d+[a-z]?(\s?Pro)?(\s?XL)?)/i);
+  if (pixelMatch) return `Pixel ${pixelMatch[1]}`;
+  
+  // Xiaomi models
+  const xiaomiMatch = ua.match(/(Mi|Redmi)\s?([A-Z0-9\s]+)/i);
+  if (xiaomiMatch) return `${xiaomiMatch[1]} ${xiaomiMatch[2]}`.trim();
+  
+  // OnePlus models
+  const oneplusMatch = ua.match(/OnePlus\s?([A-Z0-9]+)/i);
+  if (oneplusMatch) return `OnePlus ${oneplusMatch[1]}`;
+  
+  return null;
+};
+
+// Get platform (more detailed than OS)
+const getPlatform = (): string => {
+  const ua = navigator.userAgent;
+  
+  // Mobile platforms
+  if (ua.includes('Android')) {
+    const versionMatch = ua.match(/Android\s([\d.]+)/);
+    return versionMatch ? `Android ${versionMatch[1]}` : 'Android';
+  }
+  
+  if (ua.includes('iPhone') || ua.includes('iPad')) {
+    const versionMatch = ua.match(/OS\s([\d_]+)/);
+    if (versionMatch) {
+      const version = versionMatch[1].replace(/_/g, '.');
+      return `iOS ${version}`;
+    }
+    return 'iOS';
+  }
+  
+  // Desktop platforms
+  if (ua.includes('Win')) {
+    if (ua.includes('Windows NT 10.0')) return 'Windows 10/11';
+    if (ua.includes('Windows NT 6.3')) return 'Windows 8.1';
+    if (ua.includes('Windows NT 6.2')) return 'Windows 8';
+    if (ua.includes('Windows NT 6.1')) return 'Windows 7';
+    return 'Windows';
+  }
+  
+  if (ua.includes('Mac OS X')) {
+    const versionMatch = ua.match(/Mac OS X\s([\d_]+)/);
+    if (versionMatch) {
+      const version = versionMatch[1].replace(/_/g, '.');
+      return `macOS ${version}`;
+    }
+    return 'macOS';
+  }
+  
+  if (ua.includes('Linux')) return 'Linux';
+  
+  return 'Other';
+};
+
 // Track when user opens a file
 export const trackFileOpen = async (event: FileOpenEvent) => {
   try {
@@ -109,6 +258,11 @@ export const trackFileOpen = async (event: FileOpenEvent) => {
       os: getOS(),
       screen_width: window.screen.width,
       screen_height: window.screen.height,
+      // NEW: Enhanced device tracking
+      device_manufacturer: getDeviceManufacturer(),
+      device_model: getDeviceModel(),
+      platform: getPlatform(),
+      user_agent: navigator.userAgent,
     });
 
     if (error) {

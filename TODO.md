@@ -119,7 +119,6 @@
 - "Available offline" badge
 - View recent materials without internet
 
-
 ### **14. Notifications**
 - "New materials added for Data Structures"
 - Exam reminders
@@ -200,7 +199,7 @@ Add a "What's New" section in Settings showing recent updates and upcoming featu
 make some final changes
 create a readme for this and launch this publicly (make a proper version based roadmap like what is planned to be included in the next version)
 
-add a report/not working / suggestions / feedback button/page
+add a suggestions / feedback button/page
 
 --------------
 
