@@ -206,6 +206,8 @@ add a suggestions / feedback button/page
 
 integrate backbench ai into this
 
+improve the logo/icon
+
 Important - 
 
 PWA

@@ -34,6 +34,7 @@ import Labs from "./pages/Labs";
 import Settings from "./pages/Settings";
 import AdminPanel from "./pages/AdminPanel";
 import Contribute from "./pages/Contribute";
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -63,6 +64,7 @@ const App = () => {
               <Route path="/labs" element={<Labs />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="/contribute" element={<Contribute />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/saisrujan" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
